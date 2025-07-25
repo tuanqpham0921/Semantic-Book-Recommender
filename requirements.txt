@@ -1,0 +1,14 @@
+setuptools
+wheel
+kagglehub
+pandas
+seaborn
+matplotlib
+python-dotenv
+langchain-openai
+langchain-chroma
+langchain-community
+transformers
+gradio
+ipywidgets
+notebook
