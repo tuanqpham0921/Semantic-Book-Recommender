@@ -1,4 +1,5 @@
 import sys
+import os
 import gradio as gr
 from query_books import recommend_books
 from create_chroma_db_books import create_chroma_db
