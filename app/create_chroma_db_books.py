@@ -3,9 +3,9 @@ from langchain_community.document_loaders import TextLoader
 from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
-from config import OPENAI_API_KEY, CHROMA_DB_PATH
+from config import OPENAI_API_KEY, CHROMA_DB_PATH, TAGGED_DESCRIPTIONS_PATH
 
-def create_chroma_db(tagged_descriptions_path: str = "data/tagged_descriptions.txt", persist_directory: str = CHROMA_DB_PATH):
+def create_chroma_db(tagged_descriptions_path: str = TAGGED_DESCRIPTIONS_PATH, persist_directory: str = CHROMA_DB_PATH):
     print("Starting ChromaDB creation...")
 
     raw_documents = TextLoader(file_path=tagged_descriptions_path).load()

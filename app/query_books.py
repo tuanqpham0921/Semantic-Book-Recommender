@@ -1,8 +1,9 @@
-from db import get_chroma_db
 import pandas as pd
+from db import get_chroma_db
+from config import BOOKS_PATH
 
 db_books = get_chroma_db()
-books = pd.read_csv('data/books.csv')
+books = pd.read_csv(BOOKS_PATH)
 
 def retrieve_semantic_recommendations(
         query: str,

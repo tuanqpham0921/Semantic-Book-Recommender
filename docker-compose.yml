@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ./data:/data    # Mounts your local /data into container's /data
+      - ./data:/app/data    # Mounts your local /data into container's /app/data
     ports:
       - "7860:7860"     # Maps host port 7860 to container port 7860
     environment:
