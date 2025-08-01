@@ -1,13 +1,13 @@
-import gradio as gr
 import sys
-from app.query_books import recommend_books
-from app.create_chroma_db_books import create_chroma_db
+import gradio as gr
+from query_books import recommend_books
+from create_chroma_db_books import create_chroma_db
 
-
-categories = ['All', "Children's Fiction", "Children's Nonfiction", 'Fiction', 'Nonfiction']
-tones = ["All"] + ["Happy", "Surprising", "Angry", "Suspenseful", "Sad"]
 
 with gr.Blocks(theme = gr.themes.Glass()) as dashboard:
+    categories = ['All', "Children's Fiction", "Children's Nonfiction", 'Fiction', 'Nonfiction']
+    tones = ["All"] + ["Happy", "Surprising", "Angry", "Suspenseful", "Sad"]
+
     gr.Markdown("# Semantic book recommender")
 
     with gr.Row():
