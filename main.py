@@ -1,5 +1,7 @@
 import gradio as gr
+import sys
 from app.query_books import recommend_books
+from app.create_chroma_db_books import create_chroma_db
 
 
 categories = ['All', "Children's Fiction", "Children's Nonfiction", 'Fiction', 'Nonfiction']
@@ -24,7 +26,10 @@ with gr.Blocks(theme = gr.themes.Glass()) as dashboard:
 
 
 if __name__ == "__main__":
-    # default it will be on localhost (127.0.0.1)
-    # therefore onlt the local machine can access it
-    # server_name listen to all network interfaces, and the port is set to 7860
-    dashboard.launch(server_name="0.0.0.0", server_port=7860)
+    if "--init-chroma" in sys.argv:
+        create_chroma_db()
+    else:
+        # default it will be on localhost (127.0.0.1)
+        # therefore onlt the local machine can access it
+        # server_name listen to all network interfaces, and the port is set to 7860
+        dashboard.launch(server_name="0.0.0.0", server_port=7860)
