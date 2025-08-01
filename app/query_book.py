@@ -1,7 +1,6 @@
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
-import gradio as gr
 import pandas as pd
 import os
 
