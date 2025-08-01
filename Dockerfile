@@ -1,19 +1,17 @@
+# Use an official Python base image
 FROM python:3.11-slim
 
+# Set the working directory
 WORKDIR /app
 
+# Copy your app code and data
 COPY ./app /app
+# Copy requirements and install dependencies
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install gsutil properly via apt
-RUN apt-get update && \
-    apt-get install -y curl gnupg && \
-    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
-    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
-    apt-get update && \
-    apt-get install -y google-cloud-sdk
-
+# Expose the port Gradio will run on
 EXPOSE 7860
 
-CMD ["sh", "-c", "gsutil cp -r gs://tuanqpham0921_books_rec_data/data /app/data && python main.py"]
+# Run the Gradio app
+CMD ["python", "main.py"]
