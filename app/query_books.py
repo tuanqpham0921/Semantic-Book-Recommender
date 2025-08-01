@@ -4,14 +4,14 @@ from dotenv import load_dotenv
 import pandas as pd
 import os
 
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../venv/.env'))
+load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 db_books = Chroma(
     persist_directory="./chroma_db",
     embedding_function=OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
 )
-books = pd.read_csv('app/books_with_emotion.csv')
+books = pd.read_csv('data/books.csv')
 
 
 def retrieve_semantic_recommendations(
