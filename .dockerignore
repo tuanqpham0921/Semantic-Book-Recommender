@@ -22,3 +22,7 @@ __pycache__/
 # Data files you don’t want in image
 *.csv
 data/
+
+# Ignore environment configs
+.env
+*.env
