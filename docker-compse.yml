@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  book-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./data:/data    # Mounts your local /data into container's /data
+    ports:
+      - "7860:7860"     # Maps host port 7860 to container port 7860
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}  # Load from your .env file or shell
+    env_file:
+      - .env             # Optional: loads variables from a .env file
