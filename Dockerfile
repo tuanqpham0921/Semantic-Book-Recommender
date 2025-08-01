@@ -14,8 +14,5 @@ COPY . .
 # Expose the port Gradio will run on
 EXPOSE 7860
 
-# Set environment variables (optional, or use .env)
-# ENV OPENAI_API_KEY=your_openai_api_key_here
-
 # Run the Gradio app
 CMD ["python", "main.py"]
