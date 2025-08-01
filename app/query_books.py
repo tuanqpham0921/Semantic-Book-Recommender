@@ -1,18 +1,8 @@
-from langchain_chroma import Chroma
-from langchain_openai import OpenAIEmbeddings
-from dotenv import load_dotenv
+from db import get_chroma_db
 import pandas as pd
-import os
 
-load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
-db_books = Chroma(
-    persist_directory="./chroma_db",
-    embedding_function=OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
-)
+db_books = get_chroma_db()
 books = pd.read_csv('data/books.csv')
-
 
 def retrieve_semantic_recommendations(
         query: str,
