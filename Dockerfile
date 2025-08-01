@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 7860
 
 # Run the Gradio app
-CMD ["python", "main.py"]
+CMD ["sh", "-c", "gsutil cp -r gs://tuanqpham0921_books_rec_data/data /app/data && python main.py"]
