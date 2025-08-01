@@ -24,4 +24,7 @@ with gr.Blocks(theme = gr.themes.Glass()) as dashboard:
 
 
 if __name__ == "__main__":
-    dashboard.launch()
+    # default it will be on localhost (127.0.0.1)
+    # therefore onlt the local machine can access it
+    # server_name listen to all network interfaces, and the port is set to 7860
+    dashboard.launch(server_name="0.0.0.0", server_port=7860)
