@@ -5,7 +5,7 @@ import re
 import os
 
 # Load the CSV file into a pandas DataFrame
-books = pd.read_csv('books_with_emotion.csv')
+books = pd.read_csv('data/books_with_emotion.csv')
 print(books.head())
 
 # stuff with the thumbnail and picture sizes
@@ -13,9 +13,12 @@ print(books.head())
 books["large_thumbnail"] = books["thumbnail"] + "&fife=w800"
 books["large_thumbnail"] = np.where(
     books["large_thumbnail"].isna(),
-    "cover-not-found.jpg",
+    "data/cover-not-found.jpg",
     books["large_thumbnail"],
 )
+
+# Save the DataFrame to a new CSV file
+# books.to_csv('data/books_with_emotions_test.csv', index=False)
 
 from langchain_community.document_loaders import TextLoader
 from langchain_core.documents import Document
