@@ -1,3 +1,6 @@
 venv/
 .env
 chroma_db/
+*.csv
+*.jpg
+*.txt
