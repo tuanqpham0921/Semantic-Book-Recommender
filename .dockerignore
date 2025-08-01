@@ -1,1 +1,24 @@
-venv
+# Ignore Python virtual environments
+venv/
+.venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# OS files
+.DS_Store
+
+# Git files
+.git
+.gitignore
+
+# IDE configs
+.vscode/
+.idea/
+
+# Data files you don’t want in image
+*.csv
+data/
