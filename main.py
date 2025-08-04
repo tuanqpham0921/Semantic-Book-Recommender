@@ -25,6 +25,17 @@ books = pd.read_parquet(BOOKS_PATH)
 
 app = FastAPI()
 
+from fastapi.middleware.cors import CORSMiddleware
+
+# Add CORS middleware to allow cross-origin requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Define Request Body
 class RecommendationRequest(BaseModel):
     description: str
