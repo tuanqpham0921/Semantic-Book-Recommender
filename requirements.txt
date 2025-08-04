@@ -5,3 +5,8 @@ langchain-community
 transformers
 gradio
 pandas
+fastapi
+uvicorn
+pydantic
+pandas
+pyarrow
