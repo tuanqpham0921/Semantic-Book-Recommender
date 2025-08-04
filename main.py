@@ -8,8 +8,8 @@ import pandas as pd
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
 
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 # Load environment variables
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")

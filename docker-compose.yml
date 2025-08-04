@@ -5,11 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    volumes:
-      - ./data:/app/data    # Mounts your local /data into container's /app/data
     ports:
-      - "7860:7860"     # Maps host port 7860 to container port 7860
+      - "8080:8080"  # Map local port 8080 to container's 8080
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}  # Load from your .env file or shell
+      - OPENAI_API_KEY=${OPENAI_API_KEY}  # Loads from shell or env_file
     env_file:
-      - .env             # Optional: loads variables from a .env file
+      - .env  # Loads variables from .env file (Optional but recommended)

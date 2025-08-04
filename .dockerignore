@@ -26,3 +26,6 @@ __pycache__/
 # Ignore environment configs
 .env
 *.env
+
+# data_processing
+data_processing/
