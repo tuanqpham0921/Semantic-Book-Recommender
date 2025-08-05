@@ -1,7 +1,7 @@
-python-dotenv
 langchain-openai
 langchain-chroma
-langchain-community
-transformers
-gradio
+fastapi
+uvicorn
+pydantic
+pyarrow
 pandas

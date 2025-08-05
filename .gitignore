@@ -6,3 +6,5 @@ chroma_db/
 *.csv
 *.jpg
 *.txt
+*.parquet
+data/
