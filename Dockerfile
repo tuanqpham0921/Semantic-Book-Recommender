@@ -5,11 +5,14 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Copy app code and requirements
-COPY . .
 COPY requirements.txt ./
-
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Only Copy what's needed for the app to run
+COPY main.py ./
+COPY data/books.parquet ./data/
+COPY data/chroma_db/ ./data/chroma_db/
 
 # Expose Cloud Run port
 EXPOSE 8080
