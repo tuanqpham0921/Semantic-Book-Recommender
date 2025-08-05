@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Load CSV
-df = pd.read_csv('data/books.csv')
+df = pd.read_csv('data_processing/etc/books.csv')
 
 # Drop 'isbn10', 'isbn', and 'thumbnail' if they exist
 df = df.drop(columns=['isbn10', 'isbn', 'thumbnail'], errors='ignore')
@@ -9,6 +9,10 @@ df = df.drop(columns=['isbn10', 'isbn', 'thumbnail'], errors='ignore')
 # Rename 'large_thumbnail' to 'thumbnail' if it exists
 if 'large_thumbnail' in df.columns:
     df = df.rename(columns={'large_thumbnail': 'thumbnail'})
+
+# Replace 'data/cover-not-found.jpg' with 'cover-not-found.jpg' in 'thumbnail' column
+if 'thumbnail' in df.columns:
+    df['thumbnail'] = df['thumbnail'].replace('data/cover-not-found.jpg', 'cover-not-found.jpg')
 
 # Ensure 'isbn13' is string
 df['isbn13'] = df['isbn13'].astype('string')
