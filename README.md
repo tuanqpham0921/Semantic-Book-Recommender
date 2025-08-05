@@ -16,11 +16,16 @@ This project uses **Semantic Search** to recommend books based on user descripti
 ## 🛠 Tech Stack
 - **Frontend**: Vite + React (deployed on Firebase Hosting)
 - **Backend API**: FastAPI + ChromaDB (Vector Search)
+- **LLM Integration**:
+  - LangChain for chaining LLM workflows
+  - OpenAI API for embeddings and language understanding
+  - HuggingFace Transformers for preprocessing
 - **Infrastructure**: 
   - Dockerized backend
   - Google Cloud Run (for API deployment)
   - Google Cloud Build (CI/CD pipeline)
-- **Data Format**: Parquet files for optimized storage and retrieval.
+- **Data Format**: Parquet files for optimized storage and retrieval
+- **Data Models & Validation**: Pydantic for schema validation and API request handling
 
 ---
 
