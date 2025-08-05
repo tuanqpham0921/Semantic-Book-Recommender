@@ -1,8 +1,12 @@
+
 import os
+import logging
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from typing import List, Optional
 import pandas as pd
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+logger = logging.getLogger(__name__)
 
 # Assuming you have ChromaDB and your embedding function loaded here
 from langchain_chroma import Chroma
@@ -90,26 +94,31 @@ def retrieve_semantic_recommendations(
     recs = db_books.similarity_search(query, k=initial_top_k)
     books_list = [rec.page_content.strip('"').split()[0] for rec in recs]
     book_recs = books[books["isbn13"].isin(books_list)].head(initial_top_k)
-
-    print(f"Found {len(book_recs)} books matching the query.")
+    logger.info(f"Found {len(book_recs)} books matching the query.")
 
     # filter out the max number of pages if provided
     if max_pages is not None:
         book_recs = book_recs[book_recs["num_pages"] <= max_pages]
-
-    print(f"Found {len(book_recs)} books matching the query after PAGE filter.")
+        logger.info(f"Has {len(book_recs)} books after max_pages: {max_pages} filter.")
 
     # if category is not "All", filter by category
     if category != "All":
         book_recs = book_recs[book_recs["simple_categories"] == category]
+        logger.info(f"Has {len(book_recs)} books after category: {category} filter.")
 
-    print(f"Found {len(book_recs)} books matching the query after CATEGORY filter.")
 
     # only get the top recommendations based on the tone
     if tone != "All" and tone in tone_mapping:
         book_recs.sort_values(by=tone_mapping[tone], ascending=False, inplace=True)
+        logger.info(f"Has {len(book_recs)} books after tone: {tone} filter.")
 
-    print(f"Found {len(book_recs)} books matching the query after TONE filter.")
+    # log the number of books after all filters
+    if len(book_recs) == 0:
+        logger.warning("No books found matching the query after all filters.")
+        return pd.DataFrame()
+    elif len(book_recs) < final_top_k:
+        logger.warning(f"Less than the requested number of {final_top_k} recommendations available.")
+        return book_recs
 
     # get the top ten recommendations
     return book_recs.head(final_top_k)
@@ -118,11 +127,7 @@ def retrieve_semantic_recommendations(
 # Endpoint to recommend books based on user query
 @app.post("/recommend_books", response_model=List[BookRecommendation])
 def recommend_books(request: RecommendationRequest):
-
-    print("\n============================================")
-    print("type(request): ", type(request))
-    print(request)
-    print("============================================\n")
+    logger.info(f"request: {request}")
 
     # Embed user query
     df = retrieve_semantic_recommendations(request.description,
@@ -136,12 +141,10 @@ def recommend_books(request: RecommendationRequest):
         for _, row in df.iterrows()
     ]
 
-    print("\n============================================")
-    print(f"Returning {len(recommendations)} recommendations.")
-    for rec in recommendations:
-        print(f"ISBN: {rec.isbn13}, Title: {rec.title}, Authors: {rec.authors}")
-    print("============================================\n")
-
+    # Log the number of recommendations and their details
+    logger.info(f"Returning {len(recommendations)} recommendations.")
+    for rec in recommendations[:10]:
+        logger.info(f"ISBN: {rec.isbn13}, Title: {rec.title}, Authors: {rec.authors}")
 
     return recommendations
 
