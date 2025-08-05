@@ -8,8 +8,8 @@ import pandas as pd
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
 
-# from dotenv import load_dotenv
-# load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 # Load environment variables
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -67,12 +67,22 @@ class BookRecommendation(BaseModel):
     class Config:
         extra = 'allow'  # Allow extra fields if necessary
 
+# filter mapping for tones
+# This maps the tone names to the corresponding column names in the DataFrame.
+tone_mapping = {
+    "Happy": "joy",
+    "Surprising": "surprise",
+    "Angry": "anger",
+    "Suspenseful": "fear",
+    "Sad": "sadness"
+}
+
 # Performs a semantic search using the ChromaDB 
 # to retrieve book recommendations based on the input query.
 def retrieve_semantic_recommendations(
         query: str,
         category: str = "All",
-        tone: str = "Happy",
+        tone: str = "All",
         max_pages: Optional[int] = None,
         initial_top_k: int = 50,
         final_top_k: int = 10
@@ -81,25 +91,25 @@ def retrieve_semantic_recommendations(
     books_list = [rec.page_content.strip('"').split()[0] for rec in recs]
     book_recs = books[books["isbn13"].isin(books_list)].head(initial_top_k)
 
+    print(f"Found {len(book_recs)} books matching the query.")
+
     # filter out the max number of pages if provided
     if max_pages is not None:
         book_recs = book_recs[book_recs["num_pages"] <= max_pages]
+
+    print(f"Found {len(book_recs)} books matching the query after PAGE filter.")
 
     # if category is not "All", filter by category
     if category != "All":
         book_recs = book_recs[book_recs["simple_categories"] == category]
 
+    print(f"Found {len(book_recs)} books matching the query after CATEGORY filter.")
+
     # only get the top recommendations based on the tone
-    if tone == "Happy":
-        book_recs.sort_values(by="joy", ascending=False, inplace=True)
-    elif tone == "Surprising":
-        book_recs.sort_values(by="surprise", ascending=False, inplace=True)
-    elif tone == "Angry":
-        book_recs.sort_values(by="anger", ascending=False, inplace=True)
-    elif tone == "Suspenseful":
-        book_recs.sort_values(by="fear", ascending=False, inplace=True)
-    elif tone == "Sad":
-        book_recs.sort_values(by="sadness", ascending=False, inplace=True)
+    if tone != "All" and tone in tone_mapping:
+        book_recs.sort_values(by=tone_mapping[tone], ascending=False, inplace=True)
+
+    print(f"Found {len(book_recs)} books matching the query after TONE filter.")
 
     # get the top ten recommendations
     return book_recs.head(final_top_k)
@@ -108,6 +118,12 @@ def retrieve_semantic_recommendations(
 # Endpoint to recommend books based on user query
 @app.post("/recommend_books", response_model=List[BookRecommendation])
 def recommend_books(request: RecommendationRequest):
+
+    print("\n============================================")
+    print("type(request): ", type(request))
+    print(request)
+    print("============================================\n")
+
     # Embed user query
     df = retrieve_semantic_recommendations(request.description,
                                            request.filters["category"],
@@ -119,6 +135,13 @@ def recommend_books(request: RecommendationRequest):
         BookRecommendation(**row.to_dict())
         for _, row in df.iterrows()
     ]
+
+    print("\n============================================")
+    print(f"Returning {len(recommendations)} recommendations.")
+    for rec in recommendations:
+        print(f"ISBN: {rec.isbn13}, Title: {rec.title}, Authors: {rec.authors}")
+    print("============================================\n")
+
 
     return recommendations
 
