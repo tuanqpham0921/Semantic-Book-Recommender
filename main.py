@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
 
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 # Load environment variables
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -33,7 +33,10 @@ from fastapi.middleware.cors import CORSMiddleware
 # Add CORS middleware to allow cross-origin requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://www.tuanqpham0921.com"],
+    allow_origins=[
+        "https://tuanqpham0921.com",
+        "https://www.tuanqpham0921.com"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
