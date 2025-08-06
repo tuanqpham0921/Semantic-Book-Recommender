@@ -3,7 +3,7 @@
 A smart book recommendation system that leverages a Vector Database to provide personalized, context-driven recommendations.
 
 🌐 **[Try the Live Demo!](https://tuanqpham0921.com/book-recommender)**
-📖 **[Read the Blog](https://your-blog-link.com)**
+📖 **[Read the Blog]([https://your-blog-link.com](https://medium.com/@tuanqpham0921/book-recommender-project-347a85a9d4ea))**
 
 ---
 
