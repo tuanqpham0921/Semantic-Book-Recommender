@@ -7,12 +7,15 @@ import pandas as pd
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger(__name__)
 
+# Import filter_query module from app folder
+import app.filter_query as filter_query
+
 # Assuming you have ChromaDB and your embedding function loaded here
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
 
-# from dotenv import load_dotenv
-# load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 # Load environment variables
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
