@@ -1,0 +1,33 @@
+{
+    "name": "SearchExtraction",
+    "description": "Extracts the query and filters from a search request.",
+    "schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "content": {"type": "string"},
+            "filters": {
+                "type": ["object", "null"],
+                "additionalProperties": false,
+                "properties": {
+                    "tone": {
+                        "type": "string",
+                        "enum": ["anger", "disgust", "fear", "joy", "sadness", "surprise", "neutral"]
+                    },
+                    "pages_min": {"type": "integer", "minimum": 0},
+                    "pages_max": {"type": "integer", "minimum": 0},
+                    "genre": {
+                        "type": "string",
+                        "enum": ["fiction", "non-fiction", "children's fiction", "children's non-fiction"]
+                    },
+                    "key_words": {
+                        "type": "array",
+                        "items": {"type": "string", "minLength": 0}
+                    }
+                },
+                "required": ["tone", "pages_max", "pages_min", "genre", "key_words"]
+            }
+        },
+        "required": ["content", "filters"]
+    }
+}

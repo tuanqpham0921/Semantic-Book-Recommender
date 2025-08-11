@@ -10,3 +10,5 @@ pydantic
 pandas
 pyarrow
 torch
+llama-cpp-python
+openai
