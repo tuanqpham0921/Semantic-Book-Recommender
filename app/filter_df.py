@@ -2,7 +2,7 @@ import pandas as pd
 
 filter_categories = ["tone", "pages_max", "pages_min", "genre", "children", "names"]
 genre_options = ("Fiction", "Non-Fiction", "Children's Fiction", "Children's Non-Fiction")
-
+tone_options = ("joy", "surprise", "anger", "fear", "sadness")
 
 # perform the pre filters like Authors, Genre, and Pages
 def apply_pre_filters(books: pd.DataFrame, filters: dict) -> pd.DataFrame:
@@ -40,16 +40,20 @@ def apply_pre_filters(books: pd.DataFrame, filters: dict) -> pd.DataFrame:
 def apply_post_filters(books: pd.DataFrame, filters: dict, k = 10) -> pd.DataFrame:
     print("------- APPLYING POST FILTER -------------")
 
-
+    # Filter books where any of the specified names appears in the description
     if "names" in filters:
         names = filters["names"]
-        # Filter books where any of the specified names appears in the description
         name_mask = books["description"].str.contains('|'.join(names), case=False, na=False, regex=True)
         books = books[name_mask]
         print(f"Has {len(books)} books after names: {names} filter.")
 
     # Sort by tone and return the top k
-    return books.sort_values(by="tone", ascending=False).head(k)
+    # added an extra check to be sure before sorting
+    if "tone" in filters and filters["tone"] in tone_options:
+        books = books.sort_values(by=filters["tone"], ascending=False)
+
+    print("finish with post filter")
+    return books.head(k)
 
 if __name__ == "__main__":
     # quick smoke tests

@@ -5,10 +5,11 @@ import pandas as pd
 
 # Import models and configuration
 from app.models import RecommendationRequest, BookRecommendation
-from app.config import add_cors_middleware, db_books, BOOKS_PATH, filter_categories
+from app.config import add_cors_middleware, db_books, BOOKS_PATH
 
 # Import filter_query module from app folder
 import app.filter_query as filter_query
+import app.filter_df as filter_df
 
 # Configure middleware
 app = FastAPI()
@@ -52,33 +53,27 @@ def similarity_search_filtered(query: str, filtered_books: pd.DataFrame, db_book
 # Endpoint to recommend books based on user query
 @app.post("/recommend_books", response_model=List[BookRecommendation])
 def recommend_books(request: RecommendationRequest):
-    logger.info(f"request: {request}")
+    logger.info(f"REQUEST: {request}")
 
     # extract the filters here
     filters = filter_query.assemble_filters(request.description)
-    logger.info(f"filters: {filters}")
+    logger.info(f"FILTERS: {filters}")
 
     # extract the main content here
     content = filter_query.extract_content(request.description, filters)
-    logger.info(f"content: {content}")
-
-    print("================================")
-    print(f"Filters: {filters}")
-    print("================================")
-    print(f"Content: {content}")
-    print("================================")
+    logger.info(f"CONTENT: {content}")
 
     # load in a fresh patch of books
     books = pd.read_parquet(BOOKS_PATH)
 
     # apply pre-filters to the books
-    books = filter_query.apply_pre_filters(books, filters)
+    books = filter_df.apply_pre_filters(books, filters)
         
     # Perform semantic search on the filtered books
     books = similarity_search_filtered(content, books, db_books, SIMILAR_K)
 
     # apply the post-filters
-    books = filter_query.apply_post_filters(books, filters, FINAL_K)
+    books = filter_df.apply_post_filters(books, filters, FINAL_K)
 
     # Convert DataFrame rows to BookRecommendation objects
     recommendations = [
