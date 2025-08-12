@@ -12,3 +12,4 @@ pyarrow
 torch
 llama-cpp-python
 openai
+sse-starlette
