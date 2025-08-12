@@ -334,5 +334,25 @@
     "description": "genre fiction literal + pages_max + names (mixed case)",
     "expected": { "content": "a literary novella set in New york", "filters": { "genre": "fiction", "pages_max": 180, "names": ["New york"] } },
     "id": 56
+  },
+  {
+  "query": "Books written by George Orwell and Aldous Huxley",
+  "description": "names (authors, mixed case)",
+  "expected": { "content": "Books by George Orwell and Aldous Huxley", "filters": { "names": ["George Orwell", "Aldous Huxley"] } },
+  "id": 57
+  }
+  ,
+  {
+  "query": "Novels by J.K. Rowling",
+  "description": "names (author with initials)",
+  "expected": { "content": "Novels by J.K. Rowling", "filters": { "names": ["J.K. Rowling"] } },
+  "id": 58
+  }
+  ,
+  {
+  "query": "The works of Agatha Christie",
+  "description": "names (single author)",
+  "expected": { "content": "The works of Agatha Christie", "filters": { "names": ["Agatha Christie"] } },
+  "id": 59
   }
 ]
