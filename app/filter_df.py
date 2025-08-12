@@ -3,9 +3,19 @@ import pandas as pd
 filter_categories = ["tone", "pages_max", "pages_min", "genre", "children", "names"]
 genre_options = ("Fiction", "Non-Fiction", "Children's Fiction", "Children's Non-Fiction")
 
-# Performs a semantic search using the ChromaDB 
-# to retrieve book recommendations based on the input query.
-def apply_filters(books: pd.DataFrame, filters: dict) -> pd.DataFrame:
+
+# perform the pre filters like Authors, Genre, and Pages
+def apply_pre_filters(books: pd.DataFrame, filters: dict) -> pd.DataFrame:
+    print("------- APPLYING PRE FILTER -------------")
+
+    # get the authors filters first
+    if "authors" in filters:
+        authors = filters["authors"]
+
+        # Filter books where any of the specified authors appears in the authors field
+        author_mask = books["authors"].str.contains('|'.join(authors), case=False, na=False, regex=True)
+        books = books[author_mask]
+        print(f"Has {len(books)} books after authors filter: {authors}.")
 
     # get the Fiction/Non-Fiction genre first
     if "genre" in filters and filters["genre"] in ["Fiction", "Non-Fiction"]:
@@ -15,33 +25,70 @@ def apply_filters(books: pd.DataFrame, filters: dict) -> pd.DataFrame:
         books = books[books["simple_categories"] == genre]
         print(f"Has {len(books)} books after genre: {genre} filter.")
 
+    # min and max filter is last
     if "pages_min" in filters:
-        books = books[books["pages"] >= filters["pages_min"]]
-    
+        books = books[books["num_pages"] >= filters["pages_min"]]
+        print(f"Has {len(books)} books after pages_min: {filters['pages_min']} filter.")
     if "pages_max" in filters:
-        books = books[books["pages"] <= filters["pages_max"]]
-
-    # # *** This also go after the embedding search
-    # if "names" in filters:
-    #     books = books[books["names"].isin(filters["names"])]
-
-    # # tone goes last as it is not a filter in the database
-    # # *** TONE needs to be applied AFTER the vector embedding search!
-    # if "tone" in filters:
-    #     books.sort_values(by=filters["tone"], ascending=False, inplace=True)
-    #     print(f"Has {len(books)} books after tone: {filters["tone"]} filter.")
-
-    '''
-        1. get filter
-        2. validate filter (TODO)
-        3. apply filter 
-            * only (genre, pages_min/max, author)
-
-        4. convert to Document then vector search
-
-        5. Apply the tone sort filter first
-        6. Apply the keywords filter next (take only top 10)
-            * if there's not enough then takes others as well
-    '''
+        books = books[books["num_pages"] <= filters["pages_max"]]
+        print(f"Has {len(books)} books after pages_max: {filters['pages_max']} filter.")
 
     return books
+
+# perform the post filters tone and key_words
+# prioritizing the names first, then just returning the top k sorted by tone
+def apply_post_filters(books: pd.DataFrame, filters: dict, k = 10) -> pd.DataFrame:
+    print("------- APPLYING POST FILTER -------------")
+
+
+    if "names" in filters:
+        names = filters["names"]
+        # Filter books where any of the specified names appears in the description
+        name_mask = books["description"].str.contains('|'.join(names), case=False, na=False, regex=True)
+        books = books[name_mask]
+        print(f"Has {len(books)} books after names: {names} filter.")
+
+    # Sort by tone and return the top k
+    return books.sort_values(by="tone", ascending=False).head(k)
+
+if __name__ == "__main__":
+    # quick smoke tests
+    from config import BOOKS_PATH
+    books = pd.read_parquet(BOOKS_PATH)
+
+    filters = {
+        "authors": ["George Orwell", "Aldous Huxley"],
+        "genre": "Fiction",
+        "pages_min": 100,
+        "pages_max": 500
+    }
+
+    filtered_books = apply_pre_filters(books, filters)
+    
+    # for book in filtered_books.itertuples():
+    #     print(f"{book.title} by {book.authors} - {book.num_pages} pages")
+    
+    # -----------------------------------------------
+    # -----------------------------------------------
+    # -----------------------------------------------
+    # books = pd.read_parquet(BOOKS_PATH)
+
+    # filters = {}
+
+    # filtered_books = apply_pre_filters(books, filters)
+    # print(len(filtered_books), "books after applying filters.")
+
+    # -----------------------------------------------
+    # -----------------------------------------------
+    # -----------------------------------------------
+
+    # filters = {
+    #     "genre": "Fiction",
+    #     "pages_min": 100,
+    #     "children": True
+    # }
+
+    # filtered_books = apply_pre_filters(books, filters)
+    
+    # for book in filtered_books.itertuples():
+    #     print(f"{book.title} by {book.authors} - {book.num_pages} pages")
