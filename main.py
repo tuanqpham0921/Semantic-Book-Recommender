@@ -65,15 +65,19 @@ def recommend_books(request: RecommendationRequest):
 
     # load in a fresh patch of books
     books = pd.read_parquet(BOOKS_PATH)
+    logger.info(f"BOOK LEN: {len(books)}")
 
     # apply pre-filters to the books
     books = filter_df.apply_pre_filters(books, filters)
+    logger.info(f"PRE-FILTER BOOK LEN: {len(books)}")
         
     # Perform semantic search on the filtered books
     books = similarity_search_filtered(content, books, db_books, SIMILAR_K)
+    logger.info(f"POST-SEARCH BOOK LEN: {len(books)}")
 
     # apply the post-filters
     books = filter_df.apply_post_filters(books, filters, FINAL_K)
+    logger.info(f"POST-FILTER BOOK LEN: {len(books)}")
 
     # Convert DataFrame rows to BookRecommendation objects
     recommendations = [
