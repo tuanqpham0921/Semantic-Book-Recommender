@@ -1,5 +1,6 @@
 import json
 import os
+import pandas as pd
 from typing import Optional, Dict, Any, List
 from openai import OpenAI
 
@@ -11,6 +12,8 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 client = OpenAI()
 MODEL = "gpt-4o-mini-2024-07-18"
+
+filter_categories = ["tone", "pages_max", "pages_min", "genre", "children", "names"]
 
 def _so(query: str, system: str, schema: dict, extra: dict | None = None) -> dict:
     """Single-call Structured Output helper (Chat Completions API)."""
@@ -194,6 +197,33 @@ def extract_content(query: str, filters: Dict[str, Any] | None, drop_names: bool
     out = _so(query, _CONTENT_SYS, _CONTENT_SCHEMA, extra=context)
     return out["content"]
 
+# -----------------------
+# 5) Author (exact phrases)
+# -----------------------
+_AUTHORS_SCHEMA = {
+    "name": "AuthorsExtraction",
+    "strict": True,
+    "schema": {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "names": {
+                "type": "array",
+                "items": {"type": "string", "minLength": 1}
+            }
+        },
+        "required": ["names"]
+    }
+}
+_AUTHORS_SYS = (
+    "Return JSON for the schema. Extract exact proper author names from the query (including full names, initials, "
+    "and pen names), e.g., 'J.K. Rowling', 'Ernest Hemingway', 'Isaac Asimov', preserving the original casing as written. "
+    "Do NOT include generic nouns like 'writers', 'poets', or 'novelists'. If none, return an empty list."
+)
+def extract_authors(query: str) -> List[str]:
+    out = _so(query, _AUTHORS_SYS, _AUTHORS_SCHEMA)
+    return out["names"]
+
 # ------------------------------
 # ----- Compose everything -----
 # ------------------------------
@@ -204,6 +234,7 @@ def assemble_filters(query: str) -> Dict[str, Any]:
     genre = extract_genre(query)
     child = extract_children(query)
     names = extract_names(query)
+    author = extract_authors(query)
 
     filters: Dict[str, Any] = {}
     if tone: filters["tone"] = tone
@@ -212,6 +243,7 @@ def assemble_filters(query: str) -> Dict[str, Any]:
     if genre: filters["genre"] = genre
     if child: filters["children"] = True
     if names: filters["names"] = names
+    if author: filters["author"] = author
     return filters
 
 def extract_query_filters(query: str, drop_names_from_content: bool = False) -> dict:
@@ -225,16 +257,15 @@ def extract_query_filters(query: str, drop_names_from_content: bool = False) -> 
     content = extract_content(query, filters, drop_names=drop_names_from_content)
     return {"query": query, "content": content, "filters": (filters if filters else None)}
 
-
 if __name__ == "__main__":
     # quick smoke tests
-    q1 = "A mystery novel set in Paris with a somber tone under 300 pages"
+    q1 = "Books written by George Orwell and Aldous Huxley"
     q1_res = json.dumps(extract_query_filters(q1, drop_names_from_content=False), indent=2, ensure_ascii=False)
     print(q1_res)
     print("------------------------------------------------")
 
     # load in the 50 tests
-    with open("description_test_50.json", "r") as f:
+    with open("data_processing/etc/description_test_50.json", "r") as f:
         tests = json.load(f)
 
     # run and print the results
