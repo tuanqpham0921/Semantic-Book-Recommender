@@ -1,9 +1,29 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
-# Define Request Body
-class RecommendationRequest(BaseModel):
-    description: str # just a string
+# Define Query Body
+class QueryRequest(BaseModel):
+    description: str
+
+# The Filter Schema
+class FilterSchema(BaseModel):
+    genre: Optional[str] = Field(default=None)
+    author: Optional[List[str]] = Field(default=None)
+    pages_min: Optional[int] = Field(default=None)
+    pages_max: Optional[int] = Field(default=None)
+    tone: Optional[str] = Field(default=None)
+    children: Optional[bool] = Field(default=None)
+    names: Optional[List[str]] = Field(default=None)
+    # published_year: Optional[int] = Field(default=None)
+
+class ReasoningResponse(BaseModel):
+    filters: FilterSchema
+    content: str
+
+class RecommendBooksRequest(BaseModel):
+    description: str
+    filters: FilterSchema
+    content: str
 
 # Define Response with all requested fields
 class BookRecommendation(BaseModel):

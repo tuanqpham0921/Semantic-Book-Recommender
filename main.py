@@ -4,7 +4,7 @@ from typing import List
 import pandas as pd
 
 # Import models and configuration
-from app.models import RecommendationRequest, BookRecommendation
+from app.models import QueryRequest, BookRecommendation, ReasoningResponse, RecommendBooksRequest
 from app.config import add_cors_middleware, db_books, BOOKS_PATH
 
 # Import filter_query module from app folder
@@ -34,20 +34,30 @@ DEBUG_K   = 5
 def logger_separator():
     logger.info("\n" + "="*50 + "\n")
 
-# Endpoint to recommend books based on user query
-@app.post("/recommend_books", response_model=List[BookRecommendation])
-def recommend_books(request: RecommendationRequest):
-    logger_separator()
-    logger.info(f"\nREQUEST: {request}")
-    logger_separator()
-
-    # extract the filters here
+@app.post("/reason_query", response_model=ReasoningResponse)
+def reason_query_endpoint(request: QueryRequest):
     filters = filter_query.assemble_filters(request.description)
     logger.info(f"FILTERS:\n {filters}")
     logger_separator()
 
-    # extract the main content here
     content = filter_query.extract_content(request.description, filters)
+    logger.info(f"CONTENT:\n {content}")
+    logger_separator()
+
+    return {"content": content, "filters": filters}
+
+# Endpoint to recommend books based on user query
+@app.post("/recommend_books", response_model=List[BookRecommendation])
+def recommend_books(request: RecommendBooksRequest):
+    logger_separator()
+    logger.info(f"\nREQUEST: {request}")
+    logger_separator()
+
+    filters = request.filters
+    logger.info(f"FILTERS:\n {filters}")
+    logger_separator()
+
+    content = request.content
     logger.info(f"CONTENT:\n {content}")
     logger_separator()
 
