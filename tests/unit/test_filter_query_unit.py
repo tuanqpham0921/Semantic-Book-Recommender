@@ -1,4 +1,4 @@
-# tests/test_filter_query.py
+# tests/unit/test_filter_query_unit.py
 import pytest
 import json
 from unittest.mock import patch, MagicMock
@@ -7,17 +7,13 @@ import sys
 import os
 
 # Add project root to Python path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from app.filter_query import (
     extract_tone, extract_pages, extract_genre, 
     extract_children, extract_names, extract_authors,
     assemble_filters, extract_query_filters
 )
-
-# =============================================================================
-# APPROACH 1: MOCK THE OPENAI API (Recommended for most tests)
-# =============================================================================
 
 class TestFilterQueryMocked:
     """Test the logic around LLM calls by mocking OpenAI API responses"""
@@ -195,43 +191,3 @@ class TestFilterQueryMocked:
         # Should raise an exception
         with pytest.raises(json.JSONDecodeError):
             extract_tone("test query")
-
-# =============================================================================
-# APPROACH 2: INTEGRATION TESTS (Use sparingly - these cost money!)
-# =============================================================================
-
-@pytest.mark.slow
-@pytest.mark.integration
-class TestFilterQueryRealAPI:
-    """Integration tests with real OpenAI API calls - use sparingly"""
-    
-    @pytest.mark.skip(reason="Expensive - only run when needed")
-    def test_extract_children_real_api_obvious_case(self):
-        """Test children extraction with obvious case"""
-        result = extract_children("children's books")
-        
-        # This should be very reliable
-        assert result is True
-
-    @pytest.mark.skip(reason="Expensive - only run when needed")
-    def test_extract_children_real_api_adult_case(self):
-        """Test children extraction returns false for adult content"""
-        result = extract_children("adult horror novels")
-        
-        # This should reliably return False
-        assert result is False
-
-    @pytest.mark.skip(reason="Expensive - only run when needed")
-    def test_full_pipeline_real_api(self):
-        """End-to-end test with real API"""
-        query = "fiction books for children by J.K. Rowling"
-        result = extract_query_filters(query)
-        
-        # Test structure, not exact content
-        assert "content" in result
-        assert "filters" in result
-        assert isinstance(result["content"], str)
-        
-        if result["filters"]:
-            # Should detect children=True and genre=fiction reliably
-            assert result["filters"].get("children") is True
