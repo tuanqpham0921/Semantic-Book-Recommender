@@ -10,6 +10,7 @@ from app.config import add_cors_middleware, db_books, BOOKS_PATH
 # Import filter_query module from app folder
 import app.filter_query as filter_query
 import app.filter_df as filter_df
+from app.search import similarity_search_filtered
 
 # Configure middleware
 app = FastAPI()
@@ -22,33 +23,7 @@ logger = logging.getLogger(__name__)
 # how many book we want to return
 SIMILAR_K = 50
 FINAL_K   = 10
-
-def similarity_search_filtered(query: str, filtered_books: pd.DataFrame, db_books, k: int = 20):
-    """
-    Perform similarity search but only return results from the filtered DataFrame
-    """
-    if len(filtered_books) <= k:
-        return filtered_books
-
-    # Get all ISBNs from filtered books
-    filtered_isbns = set(filtered_books['isbn13'].astype(str))
-    
-    # Do a larger ChromaDB search to ensure we have enough candidates
-    search_k = min(k * 5, 400)  # Search more to account for filtering
-    recs = db_books.similarity_search(query, k=search_k)
-    
-    # Extract ISBNs from ChromaDB results
-    valid_results = []
-    for rec in recs:
-        isbn = rec.page_content.strip('"').split()[0]
-        if isbn in filtered_isbns:
-            valid_results.append(isbn)
-        if len(valid_results) >= k:
-            break
-    
-    # Return filtered books that match the similarity search
-    return filtered_books[filtered_books['isbn13'].isin(valid_results)].head(k)
-
+DEBUG_K   = 5
 
 # Endpoint to recommend books based on user query
 @app.post("/recommend_books", response_model=List[BookRecommendation])
@@ -79,18 +54,16 @@ def recommend_books(request: RecommendationRequest):
     books = filter_df.apply_post_filters(books, filters, FINAL_K)
     logger.info(f"POST-FILTER BOOK LEN: {len(books)}")
 
+    # Log the number of recommendations and their details
+    logger.info(f"Returning {len(books)} recommendations.")
+    for _, row in books.head(DEBUG_K).iterrows():
+        logger.info(f"ISBN: {row['isbn13']}, Title: {row['title']}, Authors: {row['authors']}")
+
     # Convert DataFrame rows to BookRecommendation objects
-    recommendations = [
+    return [
         BookRecommendation(**row.to_dict())
         for _, row in books.iterrows()
     ]
-
-    # Log the number of recommendations and their details
-    logger.info(f"Returning {len(recommendations)} recommendations.")
-    for rec in recommendations[:10]:
-        logger.info(f"ISBN: {rec.isbn13}, Title: {rec.title}, Authors: {rec.authors}")
-
-    return recommendations
 
 
 # place holder for API root endpoint
