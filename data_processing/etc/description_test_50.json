@@ -329,9 +329,9 @@
       "query": "A war novel with a somber and realistic portrayal",
       "description": "tone multi-word phrase",
       "expected": {
-         "content": "a war novel",
+         "content": "a war novel with a realistic portrayal",
          "filters": {
-            "tone": "somber and realistic"
+            "tone": "somber"
          }
       }
    },

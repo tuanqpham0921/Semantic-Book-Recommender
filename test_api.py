@@ -136,9 +136,6 @@ def process_query(query, payload, reasoning):
 
     return 
 
-
-
-
 def print_difference_reasoning(actual, expected):
     # if they are the same then skip
     
@@ -164,20 +161,40 @@ def print_difference_reasoning(actual, expected):
     else:
         print("YES:  differences found.")
 
-def main():
+def batch_test():
     # open the json file data_processing/etc/description_test_50.json
     with open("data_processing/etc/description_test_50.json", "r") as f:
         data = json.load(f)
 
     for item in data:
         payload = {"description": item["query"]}
+        print(f"ID: {item['id']}\n")
         reasoning = get_reasoning(item["query"], payload)
         # result = process_query(item["query"], payload, reasoning)
 
         expected_reasoning = item["expected"]
+
         print_difference_reasoning(reasoning, expected_reasoning)
 
         print("-" * 110)
+
+#================================================
+#================================================
+def single_test():
+    query = "get me a book about love with more than 333 pages"
+
+    payload = {"description": query}
+    
+    reasoning = get_reasoning(query, payload)
+    print(f"REASONING: \n{json.dumps(reasoning, indent=2)}\n")
+
+    process_query(query, payload, reasoning)
+#================================================
+#================================================
+
+def main():
+    single_test()
+    # batch_test()
 
 
 if __name__ == "__main__":
