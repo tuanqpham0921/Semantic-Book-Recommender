@@ -10,16 +10,18 @@ from app.filter_df import apply_pre_filters, apply_post_filters, tone_options
 
 def test_apply_pre_filters_authors_one(sample_books):
     """Test filtering by a single author"""
-    filters = {'authors': ['George Orwell'], 'pages_max': 350}
-    result = apply_pre_filters(sample_books, filters)
-    
+    filters = {'author': ['George Orwell'], 'pages_max': 350}
+    filterValidation = {}
+    result = apply_pre_filters(sample_books, filters, filterValidation)
+
     assert len(result) == 1
     assert result.iloc[0]['authors'] == 'George Orwell'
 
 def test_apply_pre_filters_authors_two(sample_books):
     """Test filtering by multiple authors"""
-    filters = {'authors': ['George Orwell', 'J.K. Rowling']}
-    result = apply_pre_filters(sample_books, filters)
+    filters = {'author': ['George Orwell', 'J.K. Rowling']}
+    filterValidation = {}
+    result = apply_pre_filters(sample_books, filters, filterValidation)
 
     # Simple length check is often sufficient
     assert len(result) == 3
@@ -31,7 +33,8 @@ def test_apply_pre_filters_authors_two(sample_books):
 def test_apply_pre_filters_authors_none(sample_books):
     """Test filtering with no authors specified"""
     filters = {'pages_min': 350}
-    result = apply_pre_filters(sample_books, filters)
+    filterValidation = {}
+    result = apply_pre_filters(sample_books, filters, filterValidation)
 
     # Simple checks for basic functionality
     assert len(result) == 3
@@ -39,9 +42,10 @@ def test_apply_pre_filters_authors_none(sample_books):
 
 def test_apply_pre_filters_stephen_king_books(sample_books):
     """Test filtering for Stephen King specifically - should get both his books"""
-    filters = {'authors': ['Stephen King']}
-    result = apply_pre_filters(sample_books, filters)
-    
+    filters = {'author': ['Stephen King']}
+    filterValidation = {}
+    result = apply_pre_filters(sample_books, filters, filterValidation)
+
     # Should get exactly 2 Stephen King books
     assert len(result) == 2
     
@@ -56,7 +60,8 @@ def test_apply_pre_filters_stephen_king_books(sample_books):
 def test_apply_pre_filters_genre_fiction(sample_books):
     """Test genre filtering works correctly"""
     filters = {'genre': 'Fiction'}
-    result = apply_pre_filters(sample_books, filters)
+    filterValidation = {}
+    result = apply_pre_filters(sample_books, filters, filterValidation)
     
     # All results should be Fiction
     assert all(category == 'Fiction' for category in result['simple_categories'])
@@ -68,7 +73,8 @@ def test_apply_pre_filters_genre_fiction(sample_books):
 def test_apply_pre_filters_pages_range(sample_books):
     """Test page range filtering"""
     filters = {'pages_min': 200, 'pages_max': 350}
-    result = apply_pre_filters(sample_books, filters)
+    filterValidation = {}
+    result = apply_pre_filters(sample_books, filters, filterValidation)
     
     # All books should be within the page range
     pages = result['num_pages'].tolist()
@@ -80,7 +86,8 @@ def test_apply_pre_filters_pages_range(sample_books):
 def test_apply_pre_filters_children_fiction(sample_books):
     """Test children's fiction filtering"""
     filters = {'genre': 'Fiction', 'children': True}
-    result = apply_pre_filters(sample_books, filters)
+    filterValidation = {}
+    result = apply_pre_filters(sample_books, filters, filterValidation)
     
     # Should get all Children's Fiction books
     assert len(result) == 3  # Both Harry Potter books + Charlie and the Chocolate Factory
@@ -100,7 +107,8 @@ def test_apply_pre_filters_children_fiction(sample_books):
 def test_apply_pre_filters_children_non_fiction(sample_books):
     """Test children's non-fiction filtering"""
     filters = {'genre': 'Non-Fiction', 'children': True}
-    result = apply_pre_filters(sample_books, filters)
+    filterValidation = {}
+    result = apply_pre_filters(sample_books, filters, filterValidation)
     
     # Should get Children's Non-Fiction books
     assert len(result) == 1  # National Geographic Kids Almanac
@@ -141,14 +149,15 @@ def test_apply_post_filters_tone_sorting_property(sample_books):
 def test_filter_combination_logic(sample_books):
     """Test combining multiple filters works correctly"""
     filters = {
-        'authors': ['Stephen King'],
+        'author': ['Stephen King'],
         'pages_min': 300,
         'tone': 'fear'
     }
     
     # Apply pre-filters first
-    pre_filtered = apply_pre_filters(sample_books, filters)
-    
+    filterValidation = {}
+    pre_filtered = apply_pre_filters(sample_books, filters, filterValidation)
+
     # Should only have Stephen King books >= 300 pages
     assert all('Stephen King' in author for author in pre_filtered['authors'])
     assert all(pages >= 300 for pages in pre_filtered['num_pages'])
