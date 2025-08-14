@@ -29,11 +29,14 @@ def similarity_search_filtered(query: str, filtered_books: pd.DataFrame, db_book
     # Extract ISBNs from ChromaDB results
     valid_results = []
     for rec in recs:
-        isbn = rec.page_content.strip('"').split()[0]
-        if isbn in filtered_isbns:
-            valid_results.append(isbn)
-        if len(valid_results) >= k:
-            break
+        # Parse ISBN from format: "<isbn> <description>"
+        parts = rec.page_content.strip().split()
+        if parts:
+            isbn = parts[0]
+            if isbn in filtered_isbns:
+                valid_results.append(isbn)
+            if len(valid_results) >= k:
+                break
     
     # Return filtered books that match the similarity search
     return filtered_books[filtered_books['isbn13'].isin(valid_results)].head(k)

@@ -37,7 +37,7 @@ class TestSimilaritySearchFiltered:
         """When filtered_books > k, should call ChromaDB"""
         mock_db = MagicMock()
         mock_rec = MagicMock()
-        mock_rec.page_content = '"9780385121675" "The Shining"'
+        mock_rec.page_content = "9780385121675 <book description>"
         mock_db.similarity_search.return_value = [mock_rec]
         
         result = similarity_search_filtered("test query", sample_books, mock_db, k=1)
@@ -50,7 +50,7 @@ class TestSimilaritySearchFiltered:
         
         # Mock ChromaDB to return only "The Shining"
         mock_rec = MagicMock()
-        mock_rec.page_content = '"9780385121675" "The Shining"'
+        mock_rec.page_content = "9780385121675 <book description>"
         mock_db.similarity_search.return_value = [mock_rec]
         
         result = similarity_search_filtered("horror", sample_books, mock_db, k=2)
@@ -78,10 +78,10 @@ class TestSimilaritySearchFiltered:
         
         # Mock ChromaDB to return ISBN not in filtered books
         mock_rec = MagicMock()
-        mock_rec.page_content = '"9999999999999" "Nonexistent Book"'
+        mock_rec.page_content = "9999999999999 Nonexistent Book"
         mock_db.similarity_search.return_value = [mock_rec]
         
-        result = similarity_search_filtered("test", sample_books, mock_db, k=5)
+        result = similarity_search_filtered("test", sample_books, mock_db, k=2)  # k < len(sample_books)
         
         assert len(result) == 0
         assert isinstance(result, pd.DataFrame)
@@ -89,8 +89,9 @@ class TestSimilaritySearchFiltered:
     def test_search_k_calculation(self, sample_books):
         """Should use appropriate search_k for ChromaDB"""
         mock_db = MagicMock()
+        mock_db.similarity_search.return_value = []  # Empty results
         
-        similarity_search_filtered("test", sample_books, mock_db, k=10)
+        similarity_search_filtered("test", sample_books, mock_db, k=2)  # k < len(sample_books)
         
-        # Should call with search_k = min(10 * 5, 400) = 50
-        mock_db.similarity_search.assert_called_with("test", k=50)
+        # Should call with search_k = min(2 * 5, 400) = 10
+        mock_db.similarity_search.assert_called_with("test", k=10)
