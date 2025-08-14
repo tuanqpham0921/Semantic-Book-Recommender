@@ -146,7 +146,7 @@ _NAMES_SYS = (
     "Return JSON for the schema. Extract exact proper names/terms from the query (places, regions, countries, "
     "cities, planets, nationalities, historical events, decades tokens), e.g., 'New York', 'Asia', 'UK', 'Mars', "
     "'World War II', '1980s', preserving the original casing as written. Do NOT include generic nouns "
-    "like 'dragons', 'terraforming', 'first contact'. If none, return an empty list."
+    "like 'dragons', 'terraforming', 'first contact'. Do NOT include author names. If none, return an empty list."
 )
 def extract_names(query: str) -> List[str]:
     out = _so(query, _NAMES_SYS, _NAMES_SCHEMA)
