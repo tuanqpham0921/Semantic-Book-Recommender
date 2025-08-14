@@ -73,3 +73,39 @@ def validate_max_pages_filter(books: pd.DataFrame, max_pages: int, filterValidat
     
     # everything is good
     maxPagesValidation["status"] = "success"
+
+
+
+#------------------------------------------------------
+#------------- POST FILTER VALIDATION -----------------
+#------------------------------------------------------
+
+# make sure that all the books have the keywords
+def validate_keywords_filter(books: pd.DataFrame, keywords: list, filterValidation: dict):
+    filterValidation["applied_keywords"] = {}
+    keywordsValidation = filterValidation["applied_keywords"]
+
+    keywordsValidation["applied"] = True
+    keywordsValidation["num_books_after"] = len(books)
+    keywordsValidation["filter_value"] = keywords
+
+    for index, book in books.iterrows():
+        if not pd.Series([book["description"]]).str.contains('|'.join(keywords), case=False, na=False, regex=True).any():
+            keywordsValidation["error"]  = f"Failed Keywords Filter, has {book['description']}"
+            keywordsValidation["status"] = "failed"
+            return
+    
+    # everything is good
+    keywordsValidation["status"] = "success"
+
+# make sure that tone was applied
+def validate_tone_filter(books: pd.DataFrame, tone: str, filterValidation: dict):
+    filterValidation["applied_tone"] = {}
+    toneValidation = filterValidation["applied_tone"]
+
+    toneValidation["applied"] = True
+    toneValidation["num_books_after"] = len(books)
+    toneValidation["filter_value"] = tone
+    
+    # for tone we just need to know that it was applied
+    toneValidation["status"] = "success"

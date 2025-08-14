@@ -3,7 +3,8 @@ import logging
 
 from app.filter_validation import (
     validate_author_filter, validate_genre_filter,
-    validate_min_pages_filter, validate_max_pages_filter
+    validate_min_pages_filter, validate_max_pages_filter,
+    validate_keywords_filter, validate_tone_filter
 )
 
 # Get the logger (same configuration as main.py)
@@ -58,7 +59,7 @@ def apply_pre_filters(books: pd.DataFrame, filters: dict, filterValidation: dict
 
 # perform the post filters tone and key_words
 # prioritizing the names first, then just returning the top k sorted by tone
-def apply_post_filters(books: pd.DataFrame, filters: dict, k = 10) -> pd.DataFrame:
+def apply_post_filters(books: pd.DataFrame, filters: dict, filterValidation: dict, k = 10) -> pd.DataFrame:
 
     # Filter books where any of the specified names appears in the description
     if "names" in filters and filters["names"] is not None:
@@ -66,13 +67,15 @@ def apply_post_filters(books: pd.DataFrame, filters: dict, k = 10) -> pd.DataFra
         names = filters["names"]
         name_mask = books["description"].str.contains('|'.join(names), case=False, na=False, regex=True)
         books = books[name_mask]
-        logger.info(f"Has {len(books)} books after names: {names} filter.")
+
+        validate_keywords_filter(books, filters["names"], filterValidation)
 
     # Sort by tone and return the top k
     # added an extra check to be sure before sorting
     if "tone" in filters and filters["tone"] is not None and filters["tone"] in tone_options:
-        logger.info("APPLYING tone filter")
         books = books.sort_values(by=filters["tone"], ascending=False)
+        
+        validate_tone_filter(books, filters["tone"], filterValidation)
 
     logger.info("Finished applying post filters")
     return books.head(k)

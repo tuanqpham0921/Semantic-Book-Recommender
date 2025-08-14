@@ -62,10 +62,10 @@ class ValidationLog(BaseModel):
 class FilterValidationLog(BaseModel):
     applied_author: Optional[ValidationLog] = None
     applied_genre:  Optional[ValidationLog] = None
-    applied_min_pages:  Optional[ValidationLog] = None
-    applied_max_pages:  Optional[ValidationLog] = None
-    # applied_children: Optional[ValidationLog] = None
-    # applied_tone:   Optional[ValidationLog] = None
+    applied_min_pages: Optional[ValidationLog] = None
+    applied_max_pages: Optional[ValidationLog] = None
+    applied_keywords:  Optional[ValidationLog] = None
+    applied_tone:     Optional[ValidationLog] = None
 
 class BookRecommendationResponse(BaseModel):
     recommendations: List[BookRecommendation]
