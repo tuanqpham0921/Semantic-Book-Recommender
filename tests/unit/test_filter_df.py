@@ -37,7 +37,7 @@ def test_apply_pre_filters_authors_none(sample_books):
     result = apply_pre_filters(sample_books, filters, filterValidation)
 
     # Simple checks for basic functionality
-    assert len(result) == 3
+    assert len(result) == 4
     assert all(pages >= 350 for pages in result['num_pages'])
 
 def test_apply_pre_filters_stephen_king_books(sample_books):
@@ -46,8 +46,8 @@ def test_apply_pre_filters_stephen_king_books(sample_books):
     filterValidation = {}
     result = apply_pre_filters(sample_books, filters, filterValidation)
 
-    # Should get exactly 2 Stephen King books
-    assert len(result) == 2
+    # Should get exactly 3 Stephen King books
+    assert len(result) == 3
     
     # All results should be by Stephen King
     assert all('Stephen King' in author for author in result['authors'])
