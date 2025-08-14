@@ -11,7 +11,7 @@ tone_options = ("joy", "surprise", "anger", "fear", "sadness")
 # perform the pre filters like Authors, Genre, and Pages
 def apply_pre_filters(books: pd.DataFrame, filters: dict) -> pd.DataFrame:
     # get the authors filters first
-    if "authors" in filters:
+    if "authors" in filters and filters["authors"] is not None:
         logger.info("APPLYING authors filter")
         authors = filters["authors"]
 
@@ -30,11 +30,11 @@ def apply_pre_filters(books: pd.DataFrame, filters: dict) -> pd.DataFrame:
         logger.info(f"Has {len(books)} books after genre: {genre} filter.")
 
     # min and max filter is last
-    if "pages_min" in filters:
+    if "pages_min" in filters and filters["pages_min"] is not None:
         logger.info("APPLYING pages_min filter")
         books = books[books["num_pages"] >= filters["pages_min"]]
         logger.info(f"Has {len(books)} books after pages_min: {filters['pages_min']} filter.")
-    if "pages_max" in filters:
+    if "pages_max" in filters and filters["pages_max"] is not None:
         logger.info("APPLYING pages_max filter")
         books = books[books["num_pages"] <= filters["pages_max"]]
         logger.info(f"Has {len(books)} books after pages_max: {filters['pages_max']} filter.")
@@ -46,7 +46,7 @@ def apply_pre_filters(books: pd.DataFrame, filters: dict) -> pd.DataFrame:
 def apply_post_filters(books: pd.DataFrame, filters: dict, k = 10) -> pd.DataFrame:
 
     # Filter books where any of the specified names appears in the description
-    if "names" in filters:
+    if "names" in filters and filters["names"] is not None:
         logger.info("APPLYING names filter")
         names = filters["names"]
         name_mask = books["description"].str.contains('|'.join(names), case=False, na=False, regex=True)
@@ -55,7 +55,7 @@ def apply_post_filters(books: pd.DataFrame, filters: dict, k = 10) -> pd.DataFra
 
     # Sort by tone and return the top k
     # added an extra check to be sure before sorting
-    if "tone" in filters and filters["tone"] in tone_options:
+    if "tone" in filters and filters["tone"] is not None and filters["tone"] in tone_options:
         logger.info("APPLYING tone filter")
         books = books.sort_values(by=filters["tone"], ascending=False)
 
