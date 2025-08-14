@@ -11,7 +11,9 @@ from app.filter_validation import (
     validate_author_filter,
     validate_genre_filter, 
     validate_min_pages_filter,
-    validate_max_pages_filter
+    validate_max_pages_filter,
+    validate_keywords_filter,
+    validate_tone_filter
 )
 
 class TestValidateAuthorFilter:
@@ -220,3 +222,121 @@ class TestFilterValidationIntegration:
         assert author_val['status'] == 'failed'
         # Should fail on first book (George Orwell - first in conftest)
         assert 'George Orwell' in author_val['error']
+
+class TestValidateKeywordsFilter:
+    """Test cases for validate_keywords_filter function"""
+
+    def test_successful_keywords_validation(self, sample_books):
+        """Test validation passes when all books contain keywords"""
+        # Filter to books that contain 'novel' in description
+        novel_books = sample_books[sample_books['description'].str.contains('novel', case=False, na=False)]
+        filterValidation = {}
+        
+        validate_keywords_filter(novel_books, ['novel'], filterValidation)
+        
+        assert 'applied_keywords' in filterValidation
+        keywords_val = filterValidation['applied_keywords']
+        assert keywords_val['applied'] == True
+        assert keywords_val['status'] == 'success'
+        assert keywords_val['filter_value'] == ['novel']
+        assert 'error' not in keywords_val
+
+    def test_successful_multiple_keywords_validation(self, sample_books):
+        """Test validation passes when books contain any of multiple keywords"""
+        # Filter to books that contain either 'wizard' or 'horror'
+        keyword_books = sample_books[
+            sample_books['description'].str.contains('wizard|horror', case=False, na=False, regex=True)
+        ]
+        filterValidation = {}
+        
+        validate_keywords_filter(keyword_books, ['wizard', 'horror'], filterValidation)
+        
+        keywords_val = filterValidation['applied_keywords']
+        assert keywords_val['status'] == 'success'
+        assert keywords_val['filter_value'] == ['wizard', 'horror']
+
+    def test_failed_keywords_validation(self, sample_books):
+        """Test validation fails when book doesn't contain keywords"""
+        filterValidation = {}
+        
+        # Try to validate all books against a keyword that doesn't exist
+        validate_keywords_filter(sample_books, ['nonexistent'], filterValidation)
+        
+        keywords_val = filterValidation['applied_keywords']
+        assert keywords_val['applied'] == True
+        assert keywords_val['status'] == 'failed'
+        assert 'Failed Keywords Filter' in keywords_val['error']
+
+    def test_empty_keywords_validation(self, sample_books):
+        """Test validation with empty keywords list"""
+        filterValidation = {}
+        
+        validate_keywords_filter(sample_books, [], filterValidation)
+        
+        keywords_val = filterValidation['applied_keywords']
+        assert keywords_val['status'] == 'success'  # Empty keywords should pass
+        assert keywords_val['filter_value'] == []
+
+    def test_keywords_validation_with_empty_books(self):
+        """Test keywords validation with empty DataFrame"""
+        empty_books = pd.DataFrame(columns=['description'])
+        filterValidation = {}
+        
+        validate_keywords_filter(empty_books, ['any'], filterValidation)
+        
+        keywords_val = filterValidation['applied_keywords']
+        assert keywords_val['status'] == 'success'  # Empty DataFrame should pass
+        assert keywords_val['num_books_after'] == 0
+
+class TestValidateToneFilter:
+    """Test cases for validate_tone_filter function"""
+
+    def test_successful_tone_validation(self, sample_books):
+        """Test validation passes for tone filter"""
+        filterValidation = {}
+        
+        validate_tone_filter(sample_books, 'joy', filterValidation)
+        
+        assert 'applied_tone' in filterValidation
+        tone_val = filterValidation['applied_tone']
+        assert tone_val['applied'] == True
+        assert tone_val['status'] == 'success'
+        assert tone_val['filter_value'] == 'joy'
+        assert tone_val['num_books_after'] == len(sample_books)
+        assert 'error' not in tone_val
+
+    def test_tone_validation_with_different_tones(self, sample_books):
+        """Test validation works with different tone values"""
+        tone_options = ['joy', 'surprise', 'anger', 'fear', 'sadness']
+        
+        for tone in tone_options:
+            filterValidation = {}
+            validate_tone_filter(sample_books, tone, filterValidation)
+            
+            tone_val = filterValidation['applied_tone']
+            assert tone_val['status'] == 'success'
+            assert tone_val['filter_value'] == tone
+            assert tone_val['applied'] == True
+
+    def test_tone_validation_with_empty_books(self):
+        """Test tone validation with empty DataFrame"""
+        empty_books = pd.DataFrame()
+        filterValidation = {}
+        
+        validate_tone_filter(empty_books, 'joy', filterValidation)
+        
+        tone_val = filterValidation['applied_tone']
+        assert tone_val['status'] == 'success'  # Tone validation always passes
+        assert tone_val['num_books_after'] == 0
+        assert tone_val['filter_value'] == 'joy'
+
+    def test_tone_validation_always_succeeds(self, sample_books):
+        """Test that tone validation always succeeds regardless of content"""
+        filterValidation = {}
+        
+        # Tone validation should always pass since it just confirms sorting was applied
+        validate_tone_filter(sample_books, 'invalid_tone', filterValidation)
+        
+        tone_val = filterValidation['applied_tone']
+        assert tone_val['status'] == 'success'
+        assert tone_val['filter_value'] == 'invalid_tone'
