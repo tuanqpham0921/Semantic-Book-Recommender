@@ -57,6 +57,27 @@ def print_result(result, query):
 
     print("=" * 110)
 
+
+def print_validation(validation):
+
+    for key, value in validation.items():
+        if not value:
+            print(f"No {key} validation to display.")
+            print("-" * 110)
+            continue
+
+        print(f"{key.capitalize()}:")
+        print("  applied:", value["applied"])
+        print("  num_books_after:", value["num_books_after"])
+        print("  filter_value:", value["filter_value"])
+        print()
+        print("  status:", value["status"])
+        if value["status"] == "failed":
+            print("  Error:", value["error"])
+
+        print("-" * 110)
+
+
 def filter_remove_none(filters):
     if not filters:
         return None
@@ -92,11 +113,11 @@ def main():
     if len(sys.argv) > 1:
         query = " ".join(sys.argv[1:])
     else:
-        query = prompts[2]
+        query = prompts[1]
 
     payload = {"description": query}
     reasoning = get_reasoning(query, payload)
-    # print(f"REASONING: \n{reasoning}")
+    print(f"REASONING: \n{reasoning}")
 
     recommend_book_payload = {**payload, **reasoning}
     response = requests.post(recommend_books_url, json=recommend_book_payload, headers=headers)
@@ -107,7 +128,17 @@ def main():
         quit()
 
     result = response.json()
-    print_result(result, query)
+    
+    recomendations = result["recommendations"]
+    print_result(recomendations, query)
+    
+    print("=" * 110)
+    print("=" * 110)
+    print()
+
+    print_validation(result["validation"])
+    print()
+
 
 if __name__ == "__main__":
     main()
