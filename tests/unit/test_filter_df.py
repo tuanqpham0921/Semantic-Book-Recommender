@@ -41,20 +41,20 @@ def test_apply_pre_filters_authors_none(sample_books):
     assert all(pages >= 350 for pages in result['num_pages'])
 
 def test_apply_pre_filters_stephen_king_books(sample_books):
-    """Test filtering for Stephen King specifically - should get both his books"""
+    """Test filtering for Stephen King specifically - should get all his books"""
     filters = {'author': ['Stephen King']}
     filterValidation = {}
     result = apply_pre_filters(sample_books, filters, filterValidation)
 
-    # Should get exactly 3 Stephen King books
+    # Should get exactly 3 Stephen King books (including The Talisman)
     assert len(result) == 3
     
     # All results should be by Stephen King
     assert all('Stephen King' in author for author in result['authors'])
     
-    # Should include both his books (regardless of order)
+    # Should include all three of his books (regardless of order)
     titles = set(result['title'].tolist())
-    expected_stephen_king_books = {'The Shining', 'It'}
+    expected_stephen_king_books = {'The Shining', 'It', 'The Talisman'}
     assert titles == expected_stephen_king_books
 
 def test_apply_pre_filters_genre_fiction(sample_books):
@@ -122,7 +122,8 @@ def test_apply_pre_filters_children_non_fiction(sample_books):
 def test_apply_post_filters_names_flexibility(sample_books):
     """Test name filtering without hardcoding exact results"""
     filters = {'names': ['wizard', 'Harry']}  # Should match Harry Potter books
-    result = apply_post_filters(sample_books, filters)
+    filterValidation = {}
+    result = apply_post_filters(sample_books, filters, filterValidation)
     
     # All results should contain at least one of the names in description
     for _, book in result.iterrows():
@@ -136,7 +137,8 @@ def test_apply_post_filters_names_flexibility(sample_books):
 def test_apply_post_filters_tone_sorting_property(sample_books):
     """Test that tone sorting works correctly without hardcoding order"""
     filters = {'tone': 'fear'}
-    result = apply_post_filters(sample_books, filters, k=5)
+    filterValidation = {}
+    result = apply_post_filters(sample_books, filters, filterValidation, k=5)
     
     # Should be sorted by fear in descending order
     fear_values = result['fear'].tolist()
@@ -163,7 +165,8 @@ def test_filter_combination_logic(sample_books):
     assert all(pages >= 300 for pages in pre_filtered['num_pages'])
     
     # Apply post-filters
-    final_result = apply_post_filters(pre_filtered, filters, k=10)
+    filterValidationPost = {}
+    final_result = apply_post_filters(pre_filtered, filters, filterValidationPost, k=10)
     
     # Should be sorted by fear
     fear_values = final_result['fear'].tolist()
@@ -172,7 +175,8 @@ def test_filter_combination_logic(sample_books):
 def test_tone_filtering_fear(sample_books):
     """Test filtering and sorting by fear tone"""
     filters = {"tone": "fear"}
-    result = apply_post_filters(sample_books, filters, k=3)
+    filterValidation = {}
+    result = apply_post_filters(sample_books, filters, filterValidation, k=3)
     
     # Check that books are sorted by fear in descending order
     fear_values = result["fear"].tolist()
@@ -186,16 +190,21 @@ def test_tone_filtering_fear(sample_books):
 def test_invalid_tone_ignored(sample_books):
     """Test that invalid tone values are ignored"""
     filters = {"tone": "happiness"}  # Not in tone_options
-    result = apply_post_filters(sample_books, filters, k=3)
+    filterValidation = {}
+    result = apply_post_filters(sample_books, filters, filterValidation, k=3)
     
     # Should return first k books without any special sorting
     assert len(result) == 3
+    
+    # Invalid tone should not create validation entry
+    assert 'applied_tone' not in filterValidation
 
 def test_all_tone_options_work(sample_books):
     """Test that all tone options from tone_options work correctly"""
     for tone in tone_options:
         filters = {"tone": tone}
-        result = apply_post_filters(sample_books, filters, k=3)
+        filterValidation = {}
+        result = apply_post_filters(sample_books, filters, filterValidation, k=3)
         
         # Check that result is sorted by the specified tone
         tone_values = result[tone].tolist()
@@ -208,7 +217,8 @@ def test_tone_with_names_filter(sample_books):
         "tone": "fear",
         "names": ["wizard", "chocolate"]  # Should match Harry Potter and Charlie
     }
-    result = apply_post_filters(sample_books, filters, k=5)
+    filterValidation = {}
+    result = apply_post_filters(sample_books, filters, filterValidation, k=5)
     
     # Should only have books that contain the names
     titles = result["title"].tolist()
