@@ -7,16 +7,16 @@ def sample_books():
 
         Basic stats
             simple_categories:
-                Fiction - 6 (George Orwell, Stephen King x2, Harper Lee, Bill Bryson)
+                Fiction - 7 (George Orwell, Stephen King x3, Harper Lee, Bill Bryson)
                 Non-Fiction - 2 (Malcolm Gladwell, Bill Bryson)
                 Children's Fiction - 3 (J.K. Rowling x2, Roald Dahl)
                 Children's Non-Fiction - 1 (National Geographic Kids)
 
             Authors with multiple books:
-                Stephen King - 2 books (The Shining, It)
+                Stephen King - 3 books (The Shining, It, The Talisman w/Peter Straub)
                 J.K. Rowling - 2 books (Sorcerer's Stone, Chamber of Secrets)
 
-            Pages: [80, 120, 180, 200, 250, 300, 341, 350, 400, 1138]
+            Pages: [80, 120, 180, 200, 250, 300, 341, 350, 400, 645, 1138]
     """
 
     data = [
@@ -100,6 +100,15 @@ def sample_books():
             'num_pages': 1138,
             'description': 'A terrifying horror novel about a group of children who face an ancient evil entity in the town of Derry, Maine.',
             'joy': 0.02, 'surprise': 0.8, 'anger': 0.4, 'fear': 0.98, 'sadness': 0.6
+        },
+        {
+            'isbn13': '9780345444462',
+            'title': 'The Talisman',
+            'authors': 'Stephen King;Peter Straub',
+            'simple_categories': 'Fiction',
+            'num_pages': 645,
+            'description': 'A fantasy adventure about a twelve-year-old boy who travels between parallel worlds to save his dying mother.',
+            'joy': 0.4, 'surprise': 0.7, 'anger': 0.2, 'fear': 0.6, 'sadness': 0.3
         },
         {
             'isbn13': '9780439064873',
