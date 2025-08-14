@@ -1,358 +1,684 @@
 [
-  {
-    "query": "A book about space exploration",
-    "description": "baseline: content only",
-    "expected": { "content": "a book about space exploration", "filters": null },
-    "id": 1
-  },
-  {
-    "query": "A novel set during the American Revolution",
-    "description": "names extraction (proper noun phrase)",
-    "expected": { "content": "a novel set during the American Revolution", "filters": { "names": ["American Revolution"] } },
-    "id": 2
-  },
-  {
-    "query": "A mystery novel with a dark tone",
-    "description": "tone (exact phrase)",
-    "expected": { "content": "a mystery novel", "filters": { "tone": "dark" } },
-    "id": 3
-  },
-  {
-    "query": "A fantasy book with at least 400 pages",
-    "description": "pages_min from 'at least'",
-    "expected": { "content": "a fantasy book", "filters": { "pages_min": 400 } },
-    "id": 4
-  },
-  {
-    "query": "Find me a cheerful historical romance under 300 pages but more than 53 pages",
-    "description": "both pages_max and pages_min with tone",
-    "expected": { "content": "a historical romance", "filters": { "tone": "cheerful", "pages_max": 300, "pages_min": 53 } },
-    "id": 5
-  },
-  {
-    "query": "A science fiction book with a serious tone about artificial intelligence",
-    "description": "genre=fiction literal + tone",
-    "expected": { "content": "a science book about artificial intelligence", "filters": { "genre": "fiction", "tone": "serious" } },
-    "id": 6
-  },
-  {
-    "query": "A lighthearted children’s book with fewer than 50 pages about animals",
-    "description": "children mention + pages_max + tone",
-    "expected": { "content": "a children’s book about animals", "filters": { "tone": "lighthearted", "pages_max": 50, "children": true } },
-    "id": 7
-  },
-  {
-    "query": "An inspiring biography of a famous scientist",
-    "description": "tone only (adjective before type)",
-    "expected": { "content": "an inspiring biography of a famous scientist", "filters": { "tone": "inspiring" } },
-    "id": 8
-  },
-  {
-    "query": "A dystopian novel with a hopeful ending and more than 250 pages",
-    "description": "tone + pages_min from 'more than'",
-    "expected": { "content": "a dystopian novel", "filters": { "tone": "hopeful", "pages_min": 250 } },
-    "id": 9
-  },
-  {
-    "query": "A gripping crime thriller set in New York with a somber tone",
-    "description": "names (city, proper case) + tone",
-    "expected": { "content": "a gripping crime thriller", "filters": { "tone": "somber", "names": ["New York"] } },
-    "id": 10
-  },
-  {
-    "query": "Find me a happy romance novel with at least 200 pages about second chances",
-    "description": "tone + pages_min + content topic",
-    "expected": { "content": "a romance novel about second chances", "filters": { "tone": "happy", "pages_min": 200 } },
-    "id": 11
-  },
-  {
-    "query": "A thrilling adventure book with a strong female lead",
-    "description": "tone as descriptor",
-    "expected": { "content": "an adventure book with a strong female lead", "filters": { "tone": "thrilling" } },
-    "id": 12
-  },
-  {
-    "query": "A poetry collection about nature",
-    "description": "baseline content only (no filters)",
-    "expected": { "content": "a poetry collection about nature", "filters": null },
-    "id": 13
-  },
-  {
-    "query": "A cookbook with at least 100 vegetarian recipes",
-    "description": "content only (no pages filter specified for recipes count)",
-    "expected": { "content": "a cookbook with at least 100 vegetarian recipes", "filters": null },
-    "id": 14
-  },
-  {
-    "query": "A motivational self-help book with a positive tone",
-    "description": "tone only (post-noun)",
-    "expected": { "content": "a motivational self-help book", "filters": { "tone": "positive" } },
-    "id": 15
-  },
-  {
-    "query": "A horror story with less than 150 pages",
-    "description": "pages_max from 'less than'",
-    "expected": { "content": "a horror story", "filters": { "pages_max": 150 } },
-    "id": 16
-  },
-  {
-    "query": "A detective novel set in Victorian London",
-    "description": "names extraction (period/location phrase)",
-    "expected": { "content": "a detective novel set in Victorian London", "filters": { "names": ["Victorian London"] } },
-    "id": 17
-  },
-  {
-    "query": "A young adult fantasy series opener with a hopeful tone",
-    "description": "tone only",
-    "expected": { "content": "a young adult fantasy series opener", "filters": { "tone": "hopeful" } },
-    "id": 18
-  },
-  {
-    "query": "A travel memoir about backpacking through Asia",
-    "description": "names extraction (continent, proper case)",
-    "expected": { "content": "a travel memoir about backpacking through Asia", "filters": { "names": ["Asia"] } },
-    "id": 19
-  },
-  {
-    "query": "A comedy novel under 200 pages",
-    "description": "pages_max from 'under'",
-    "expected": { "content": "a comedy novel", "filters": { "pages_max": 200 } },
-    "id": 20
-  },
-  {
-    "query": "A graphic novel with vibrant artwork about superheroes",
-    "description": "content only",
-    "expected": { "content": "a graphic novel with vibrant artwork about superheroes", "filters": null },
-    "id": 21
-  },
-  {
-    "query": "A romance set on a tropical island with a bittersweet ending",
-    "description": "tone phrase (bittersweet ending)",
-    "expected": { "content": "a romance set on a tropical island", "filters": { "tone": "bittersweet" } },
-    "id": 22
-  },
-  {
-    "query": "A science nonfiction book with at least 500 pages about climate change",
-    "description": "genre non-fiction literal (as 'nonfiction') + pages_min",
-    "expected": { "content": "a science book about climate change", "filters": { "genre": "non-fiction", "pages_min": 500 } },
-    "id": 23
-  },
-  {
-    "query": "A medieval fantasy book with dragons",
-    "description": "content only (no names or tone)",
-    "expected": { "content": "a medieval fantasy book with dragons", "filters": null },
-    "id": 24
-  },
-  {
-    "query": "A crime novel with a female detective lead",
-    "description": "content only",
-    "expected": { "content": "a crime novel with a female detective lead", "filters": null },
-    "id": 25
-  },
-  {
-    "query": "A historical fiction novel with a tragic tone",
-    "description": "genre fiction literal + tone",
-    "expected": { "content": "a historical novel", "filters": { "genre": "fiction", "tone": "tragic" } },
-    "id": 26
-  },
-  {
-    "query": "A children’s bedtime story about friendship",
-    "description": "children mention (possessive form)",
-    "expected": { "content": "a children’s bedtime story about friendship", "filters": { "children": true } },
-    "id": 27
-  },
-  {
-    "query": "An epic fantasy saga with over 600 pages",
-    "description": "pages_min from 'over'",
-    "expected": { "content": "an epic fantasy saga", "filters": { "pages_min": 600 } },
-    "id": 28
-  },
-  {
-    "query": "A biography with a humorous tone",
-    "description": "tone only",
-    "expected": { "content": "a biography", "filters": { "tone": "humorous" } },
-    "id": 29
-  },
-  {
-    "query": "A war novel with a somber and realistic portrayal",
-    "description": "tone multi-word phrase",
-    "expected": { "content": "a war novel", "filters": { "tone": "somber and realistic" } },
-    "id": 30
-  },
-  {
-    "query": "A sci-fi adventure under 300 pages",
-    "description": "pages_max",
-    "expected": { "content": "a sci-fi adventure", "filters": { "pages_max": 300 } },
-    "id": 31
-  },
-  {
-    "query": "A nonfiction book about the history of jazz",
-    "description": "genre non-fiction literal (exact word)",
-    "expected": { "content": "a book about the history of jazz", "filters": { "genre": "non-fiction" } },
-    "id": 32
-  },
-  {
-    "query": "A romantic comedy novel with a happy ending",
-    "description": "tone word 'happy'",
-    "expected": { "content": "a romantic comedy novel", "filters": { "tone": "happy" } },
-    "id": 33
-  },
-  {
-    "query": "A psychological thriller with at least 350 pages",
-    "description": "pages_min",
-    "expected": { "content": "a psychological thriller", "filters": { "pages_min": 350 } },
-    "id": 34
-  },
-  {
-    "query": "A contemporary drama about family secrets",
-    "description": "content only",
-    "expected": { "content": "a contemporary drama about family secrets", "filters": null },
-    "id": 35
-  },
-  {
-    "query": "A western novel with a rugged hero",
-    "description": "content only",
-    "expected": { "content": "a western novel with a rugged hero", "filters": null },
-    "id": 36
-  },
-  {
-    "query": "A horror novel with supernatural elements",
-    "description": "content only",
-    "expected": { "content": "a horror novel with supernatural elements", "filters": null },
-    "id": 37
-  },
-  {
-    "query": "A memoir with an uplifting message",
-    "description": "tone word 'uplifting'",
-    "expected": { "content": "a memoir with an uplifting message", "filters": { "tone": "uplifting" } },
-    "id": 38
-  },
-  {
-    "query": "A coming-of-age novel set in the 1980s",
-    "description": "names extraction (decade token)",
-    "expected": { "content": "a coming-of-age novel set in the 1980s", "filters": { "names": ["1980s"] } },
-    "id": 39
-  },
-  {
-    "query": "A cyberpunk novel with a noir tone",
-    "description": "tone word 'noir'",
-    "expected": { "content": "a cyberpunk novel", "filters": { "tone": "noir" } },
-    "id": 40
-  },
-  {
-    "query": "A detective story with comedic elements",
-    "description": "tone word 'comedic'",
-    "expected": { "content": "a detective story", "filters": { "tone": "comedic" } },
-    "id": 41
-  },
-  {
-    "query": "A classic literature book under 200 pages",
-    "description": "pages_max",
-    "expected": { "content": "a classic literature book", "filters": { "pages_max": 200 } },
-    "id": 42
-  },
-  {
-    "query": "A fantasy romance novel with a tragic ending",
-    "description": "tone word 'tragic'",
-    "expected": { "content": "a fantasy romance novel", "filters": { "tone": "tragic" } },
-    "id": 43
-  },
-  {
-    "query": "A non-fiction guide to financial independence",
-    "description": "genre exact 'non-fiction' hyphenated",
-    "expected": { "content": "a guide to financial independence", "filters": { "genre": "non-fiction" } },
-    "id": 44
-  },
-  {
-    "query": "A mystery novel set in a small coastal town in Portugal",
-    "description": "names extraction (country)",
-    "expected": { "content": "a mystery novel set in a small coastal town in Portugal", "filters": { "names": ["Portugal"] } },
-    "id": 45
-  },
-  {
-    "query": "A literary fiction novel with poetic language, not sad",
-    "description": "genre fiction literal + tone as negated phrase",
-    "expected": { "content": "a literary novel with poetic language", "filters": { "genre": "fiction", "tone": "not sad" } },
-    "id": 46
-  },
-  {
-    "query": "A romantic adventure in the mountains of italy",
-    "description": "names extraction (lowercase country)",
-    "expected": { "content": "a romantic adventure in the mountains of italy", "filters": { "names": ["italy"] } },
-    "id": 47
-  },
-  {
-    "query": "A futuristic novel about Mars colonization and terraforming",
-    "description": "names extraction (planet, proper case)",
-    "expected": { "content": "a futuristic novel about Mars colonization and terraforming", "filters": { "names": ["Mars"] } },
-    "id": 48
-  },
-  {
-    "query": "A short story collection with dark humor for kids, under 180 pages",
-    "description": "children mention (kids) + pages_max + tone phrase",
-    "expected": { "content": "a short story collection with dark humor for kids", "filters": { "children": true, "pages_max": 180, "tone": "dark humor" } },
-    "id": 49
-  },
-  {
-    "query": "NONFICTION book about the UK with at least 120 pages",
-    "description": "genre variant uppercase NONFICTION -> non-fiction + names + pages_min",
-    "expected": { "content": "a book about the UK", "filters": { "genre": "non-fiction", "pages_min": 120, "names": ["UK"] } },
-    "id": 50
-  },
-  {
-    "query": "a mystery novel set in paris",
-    "description": "names extraction (lowercase city)",
-    "expected": { "content": "a mystery novel set in paris", "filters": { "names": ["paris"] } },
-    "id": 51
-  },
-  {
-    "query": "A children book on early reading skills",
-    "description": "children mention (singular 'children')",
-    "expected": { "content": "a children book on early reading skills", "filters": { "children": true } },
-    "id": 52
-  },
-  {
-    "query": "A kids' book about dinosaurs",
-    "description": "children mention (kids')",
-    "expected": { "content": "a kids' book about dinosaurs", "filters": { "children": true } },
-    "id": 53
-  },
-  {
-    "query": "A kid book about colors with fewer than 30 pages",
-    "description": "children mention (kid) + pages_max phrase",
-    "expected": { "content": "a kid book about colors", "filters": { "children": true, "pages_max": 30 } },
-    "id": 54
-  },
-  {
-    "query": "A non fiction book on World War II with a somber voice",
-    "description": "genre variant 'non fiction' spaced -> non-fiction + names + tone word",
-    "expected": { "content": "a book on World War II", "filters": { "genre": "non-fiction", "tone": "somber", "names": ["World War II"] } },
-    "id": 55
-  },
-  {
-    "query": "A literary fiction novella under 180 pages set in New york",
-    "description": "genre fiction literal + pages_max + names (mixed case)",
-    "expected": { "content": "a literary novella set in New york", "filters": { "genre": "fiction", "pages_max": 180, "names": ["New york"] } },
-    "id": 56
-  },
-  {
-  "query": "Books written by George Orwell and Aldous Huxley",
-  "description": "names (authors, mixed case)",
-  "expected": { "content": "Books by George Orwell and Aldous Huxley", "filters": { "names": ["George Orwell", "Aldous Huxley"] } },
-  "id": 57
-  }
-  ,
-  {
-  "query": "Novels by J.K. Rowling",
-  "description": "names (author with initials)",
-  "expected": { "content": "Novels by J.K. Rowling", "filters": { "names": ["J.K. Rowling"] } },
-  "id": 58
-  }
-  ,
-  {
-  "query": "The works of Agatha Christie",
-  "description": "names (single author)",
-  "expected": { "content": "The works of Agatha Christie", "filters": { "names": ["Agatha Christie"] } },
-  "id": 59
-  }
+   {
+      "id": 1,
+      "query": "A book about space exploration",
+      "description": "baseline: content only",
+      "expected": {
+         "content": "a book about space exploration",
+         "filters": null
+      }
+   },
+   {
+      "id": 2,
+      "query": "A novel set during the American Revolution",
+      "description": "names extraction (proper noun phrase)",
+      "expected": {
+         "content": "a novel set during the American Revolution",
+         "filters": {
+            "names": [
+               "American Revolution"
+            ]
+         }
+      }
+   },
+   {
+      "id": 3,
+      "query": "A mystery novel with a dark tone",
+      "description": "tone (exact phrase)",
+      "expected": {
+         "content": "a mystery novel",
+         "filters": {
+            "tone": "dark"
+         }
+      }
+   },
+   {
+      "id": 4,
+      "query": "A fantasy book with at least 400 pages",
+      "description": "pages_min from 'at least'",
+      "expected": {
+         "content": "a fantasy book",
+         "filters": {
+            "pages_min": 400
+         }
+      }
+   },
+   {
+      "id": 5,
+      "query": "Find me a cheerful historical romance under 300 pages but more than 53 pages",
+      "description": "both pages_max and pages_min with tone",
+      "expected": {
+         "content": "a historical romance",
+         "filters": {
+            "tone": "cheerful",
+            "pages_max": 300,
+            "pages_min": 53
+         }
+      }
+   },
+   {
+      "id": 6,
+      "query": "A science fiction book with a serious tone about artificial intelligence",
+      "description": "genre=fiction literal + tone",
+      "expected": {
+         "content": "a science book about artificial intelligence",
+         "filters": {
+            "genre": "fiction",
+            "tone": "serious"
+         }
+      }
+   },
+   {
+      "id": 7,
+      "query": "A lighthearted children’s book with fewer than 50 pages about animals",
+      "description": "children mention + pages_max + tone",
+      "expected": {
+         "content": "a children’s book about animals",
+         "filters": {
+            "tone": "lighthearted",
+            "pages_max": 50,
+            "children": true
+         }
+      }
+   },
+   {
+      "id": 8,
+      "query": "An inspiring biography of a famous scientist",
+      "description": "tone only (adjective before type)",
+      "expected": {
+         "content": "an inspiring biography of a famous scientist",
+         "filters": {
+            "tone": "inspiring"
+         }
+      }
+   },
+   {
+      "id": 9,
+      "query": "A dystopian novel with a hopeful ending and more than 250 pages",
+      "description": "tone + pages_min from 'more than'",
+      "expected": {
+         "content": "a dystopian novel",
+         "filters": {
+            "tone": "hopeful",
+            "pages_min": 250
+         }
+      }
+   },
+   {
+      "id": 10,
+      "query": "A gripping crime thriller set in New York with a somber tone",
+      "description": "names (city, proper case) + tone",
+      "expected": {
+         "content": "a gripping crime thriller",
+         "filters": {
+            "tone": "somber",
+            "names": [
+               "New York"
+            ]
+         }
+      }
+   },
+   {
+      "id": 11,
+      "query": "Find me a happy romance novel with at least 200 pages about second chances",
+      "description": "tone + pages_min + content topic",
+      "expected": {
+         "content": "a romance novel about second chances",
+         "filters": {
+            "tone": "happy",
+            "pages_min": 200
+         }
+      }
+   },
+   {
+      "id": 12,
+      "query": "A thrilling adventure book with a strong female lead",
+      "description": "tone as descriptor",
+      "expected": {
+         "content": "an adventure book with a strong female lead",
+         "filters": {
+            "tone": "thrilling"
+         }
+      }
+   },
+   {
+      "id": 13,
+      "query": "A poetry collection about nature",
+      "description": "baseline content only (no filters)",
+      "expected": {
+         "content": "a poetry collection about nature",
+         "filters": null
+      }
+   },
+   {
+      "id": 14,
+      "query": "A cookbook with at least 100 vegetarian recipes",
+      "description": "content only (no pages filter specified for recipes count)",
+      "expected": {
+         "content": "a cookbook with at least 100 vegetarian recipes",
+         "filters": null
+      }
+   },
+   {
+      "id": 15,
+      "query": "A motivational self-help book with a positive tone",
+      "description": "tone only (post-noun)",
+      "expected": {
+         "content": "a motivational self-help book",
+         "filters": {
+            "tone": "positive"
+         }
+      }
+   },
+   {
+      "id": 16,
+      "query": "A horror story with less than 150 pages",
+      "description": "pages_max from 'less than'",
+      "expected": {
+         "content": "a horror story",
+         "filters": {
+            "pages_max": 150
+         }
+      }
+   },
+   {
+      "id": 17,
+      "query": "A detective novel set in Victorian London",
+      "description": "names extraction (period/location phrase)",
+      "expected": {
+         "content": "a detective novel set in Victorian London",
+         "filters": {
+            "names": [
+               "Victorian London"
+            ]
+         }
+      }
+   },
+   {
+      "id": 18,
+      "query": "A young adult fantasy series opener with a hopeful tone",
+      "description": "tone only",
+      "expected": {
+         "content": "a young adult fantasy series opener",
+         "filters": {
+            "tone": "hopeful"
+         }
+      }
+   },
+   {
+      "id": 19,
+      "query": "A travel memoir about backpacking through Asia",
+      "description": "names extraction (continent, proper case)",
+      "expected": {
+         "content": "a travel memoir about backpacking through Asia",
+         "filters": {
+            "names": [
+               "Asia"
+            ]
+         }
+      }
+   },
+   {
+      "id": 20,
+      "query": "A comedy novel under 200 pages",
+      "description": "pages_max from 'under'",
+      "expected": {
+         "content": "a comedy novel",
+         "filters": {
+            "pages_max": 200
+         }
+      }
+   },
+   {
+      "id": 21,
+      "query": "A graphic novel with vibrant artwork about superheroes",
+      "description": "content only",
+      "expected": {
+         "content": "a graphic novel with vibrant artwork about superheroes",
+         "filters": null
+      }
+   },
+   {
+      "id": 22,
+      "query": "A romance set on a tropical island with a bittersweet ending",
+      "description": "tone phrase (bittersweet ending)",
+      "expected": {
+         "content": "a romance set on a tropical island",
+         "filters": {
+            "tone": "bittersweet"
+         }
+      }
+   },
+   {
+      "id": 23,
+      "query": "A science nonfiction book with at least 500 pages about climate change",
+      "description": "genre non-fiction literal (as 'nonfiction') + pages_min",
+      "expected": {
+         "content": "a science book about climate change",
+         "filters": {
+            "genre": "non-fiction",
+            "pages_min": 500
+         }
+      }
+   },
+   {
+      "id": 24,
+      "query": "A medieval fantasy book with dragons",
+      "description": "content only (no names or tone)",
+      "expected": {
+         "content": "a medieval fantasy book with dragons",
+         "filters": null
+      }
+   },
+   {
+      "id": 25,
+      "query": "A crime novel with a female detective lead",
+      "description": "content only",
+      "expected": {
+         "content": "a crime novel with a female detective lead",
+         "filters": null
+      }
+   },
+   {
+      "id": 26,
+      "query": "A historical fiction novel with a tragic tone",
+      "description": "genre fiction literal + tone",
+      "expected": {
+         "content": "a historical novel",
+         "filters": {
+            "genre": "fiction",
+            "tone": "tragic"
+         }
+      }
+   },
+   {
+      "id": 27,
+      "query": "A children’s bedtime story about friendship",
+      "description": "children mention (possessive form)",
+      "expected": {
+         "content": "a children’s bedtime story about friendship",
+         "filters": {
+            "children": true
+         }
+      }
+   },
+   {
+      "id": 28,
+      "query": "An epic fantasy saga with over 600 pages",
+      "description": "pages_min from 'over'",
+      "expected": {
+         "content": "an epic fantasy saga",
+         "filters": {
+            "pages_min": 600
+         }
+      }
+   },
+   {
+      "id": 29,
+      "query": "A biography with a humorous tone",
+      "description": "tone only",
+      "expected": {
+         "content": "a biography",
+         "filters": {
+            "tone": "humorous"
+         }
+      }
+   },
+   {
+      "id": 30,
+      "query": "A war novel with a somber and realistic portrayal",
+      "description": "tone multi-word phrase",
+      "expected": {
+         "content": "a war novel",
+         "filters": {
+            "tone": "somber and realistic"
+         }
+      }
+   },
+   {
+      "id": 31,
+      "query": "A sci-fi adventure under 300 pages",
+      "description": "pages_max",
+      "expected": {
+         "content": "a sci-fi adventure",
+         "filters": {
+            "pages_max": 300
+         }
+      }
+   },
+   {
+      "id": 32,
+      "query": "A nonfiction book about the history of jazz",
+      "description": "genre non-fiction literal (exact word)",
+      "expected": {
+         "content": "a book about the history of jazz",
+         "filters": {
+            "genre": "non-fiction"
+         }
+      }
+   },
+   {
+      "id": 33,
+      "query": "A romantic comedy novel with a happy ending",
+      "description": "tone word 'happy'",
+      "expected": {
+         "content": "a romantic comedy novel",
+         "filters": {
+            "tone": "happy"
+         }
+      }
+   },
+   {
+      "id": 34,
+      "query": "A psychological thriller with at least 350 pages",
+      "description": "pages_min",
+      "expected": {
+         "content": "a psychological thriller",
+         "filters": {
+            "pages_min": 350
+         }
+      }
+   },
+   {
+      "id": 35,
+      "query": "A contemporary drama about family secrets",
+      "description": "content only",
+      "expected": {
+         "content": "a contemporary drama about family secrets",
+         "filters": null
+      }
+   },
+   {
+      "id": 36,
+      "query": "A western novel with a rugged hero",
+      "description": "content only",
+      "expected": {
+         "content": "a western novel with a rugged hero",
+         "filters": null
+      }
+   },
+   {
+      "id": 37,
+      "query": "A horror novel with supernatural elements",
+      "description": "content only",
+      "expected": {
+         "content": "a horror novel with supernatural elements",
+         "filters": null
+      }
+   },
+   {
+      "id": 38,
+      "query": "A memoir with an uplifting message",
+      "description": "tone word 'uplifting'",
+      "expected": {
+         "content": "a memoir with an uplifting message",
+         "filters": {
+            "tone": "uplifting"
+         }
+      }
+   },
+   {
+      "id": 39,
+      "query": "A coming-of-age novel set in the 1980s",
+      "description": "names extraction (decade token)",
+      "expected": {
+         "content": "a coming-of-age novel set in the 1980s",
+         "filters": {
+            "names": [
+               "1980s"
+            ]
+         }
+      }
+   },
+   {
+      "id": 40,
+      "query": "A cyberpunk novel with a noir tone",
+      "description": "tone word 'noir'",
+      "expected": {
+         "content": "a cyberpunk novel",
+         "filters": {
+            "tone": "noir"
+         }
+      }
+   },
+   {
+      "id": 41,
+      "query": "A detective story with comedic elements",
+      "description": "tone word 'comedic'",
+      "expected": {
+         "content": "a detective story",
+         "filters": {
+            "tone": "comedic"
+         }
+      }
+   },
+   {
+      "id": 42,
+      "query": "A classic literature book under 200 pages",
+      "description": "pages_max",
+      "expected": {
+         "content": "a classic literature book",
+         "filters": {
+            "pages_max": 200
+         }
+      }
+   },
+   {
+      "id": 43,
+      "query": "A fantasy romance novel with a tragic ending",
+      "description": "tone word 'tragic'",
+      "expected": {
+         "content": "a fantasy romance novel",
+         "filters": {
+            "tone": "tragic"
+         }
+      }
+   },
+   {
+      "id": 44,
+      "query": "A non-fiction guide to financial independence",
+      "description": "genre exact 'non-fiction' hyphenated",
+      "expected": {
+         "content": "a guide to financial independence",
+         "filters": {
+            "genre": "non-fiction"
+         }
+      }
+   },
+   {
+      "id": 45,
+      "query": "A mystery novel set in a small coastal town in Portugal",
+      "description": "names extraction (country)",
+      "expected": {
+         "content": "a mystery novel set in a small coastal town in Portugal",
+         "filters": {
+            "names": [
+               "Portugal"
+            ]
+         }
+      }
+   },
+   {
+      "id": 46,
+      "query": "A literary fiction novel with poetic language, not sad",
+      "description": "genre fiction literal + tone as negated phrase",
+      "expected": {
+         "content": "a literary novel with poetic language",
+         "filters": {
+            "genre": "fiction",
+            "tone": "not sad"
+         }
+      }
+   },
+   {
+      "id": 47,
+      "query": "A romantic adventure in the mountains of italy",
+      "description": "names extraction (lowercase country)",
+      "expected": {
+         "content": "a romantic adventure in the mountains of italy",
+         "filters": {
+            "names": [
+               "italy"
+            ]
+         }
+      }
+   },
+   {
+      "id": 48,
+      "query": "A futuristic novel about Mars colonization and terraforming",
+      "description": "names extraction (planet, proper case)",
+      "expected": {
+         "content": "a futuristic novel about Mars colonization and terraforming",
+         "filters": {
+            "names": [
+               "Mars"
+            ]
+         }
+      }
+   },
+   {
+      "id": 49,
+      "query": "A short story collection with dark humor for kids, under 180 pages",
+      "description": "children mention (kids) + pages_max + tone phrase",
+      "expected": {
+         "content": "a short story collection with dark humor for kids",
+         "filters": {
+            "children": true,
+            "pages_max": 180,
+            "tone": "dark humor"
+         }
+      }
+   },
+   {
+      "id": 50,
+      "query": "NONFICTION book about the UK with at least 120 pages",
+      "description": "genre variant uppercase NONFICTION -> non-fiction + names + pages_min",
+      "expected": {
+         "content": "a book about the UK",
+         "filters": {
+            "genre": "non-fiction",
+            "pages_min": 120,
+            "names": [
+               "UK"
+            ]
+         }
+      }
+   },
+   {
+      "id": 51,
+      "query": "a mystery novel set in paris",
+      "description": "names extraction (lowercase city)",
+      "expected": {
+         "content": "a mystery novel set in paris",
+         "filters": {
+            "names": [
+               "paris"
+            ]
+         }
+      }
+   },
+   {
+      "id": 52,
+      "query": "A children book on early reading skills",
+      "description": "children mention (singular 'children')",
+      "expected": {
+         "content": "a children book on early reading skills",
+         "filters": {
+            "children": true
+         }
+      }
+   },
+   {
+      "id": 53,
+      "query": "A kids' book about dinosaurs",
+      "description": "children mention (kids')",
+      "expected": {
+         "content": "a kids' book about dinosaurs",
+         "filters": {
+            "children": true
+         }
+      }
+   },
+   {
+      "id": 54,
+      "query": "A kid book about colors with fewer than 30 pages",
+      "description": "children mention (kid) + pages_max phrase",
+      "expected": {
+         "content": "a kid book about colors",
+         "filters": {
+            "children": true,
+            "pages_max": 30
+         }
+      }
+   },
+   {
+      "id": 55,
+      "query": "A non fiction book on World War II with a somber voice",
+      "description": "genre variant 'non fiction' spaced -> non-fiction + names + tone word",
+      "expected": {
+         "content": "a book on World War II",
+         "filters": {
+            "genre": "non-fiction",
+            "tone": "somber",
+            "names": [
+               "World War II"
+            ]
+         }
+      }
+   },
+   {
+      "id": 56,
+      "query": "A literary fiction novella under 180 pages set in New york",
+      "description": "genre fiction literal + pages_max + names (mixed case)",
+      "expected": {
+         "content": "a literary novella set in New york",
+         "filters": {
+            "genre": "fiction",
+            "pages_max": 180,
+            "names": [
+               "New york"
+            ]
+         }
+      }
+   },
+   {
+      "id": 57,
+      "query": "Books written by George Orwell and Aldous Huxley",
+      "description": "names (authors, mixed case)",
+      "expected": {
+         "content": "Books by George Orwell and Aldous Huxley",
+         "filters": {
+            "names": [
+               "George Orwell",
+               "Aldous Huxley"
+            ]
+         }
+      }
+   },
+   {
+      "id": 58,
+      "query": "Novels by J.K. Rowling",
+      "description": "names (author with initials)",
+      "expected": {
+         "content": "Novels by J.K. Rowling",
+         "filters": {
+            "names": [
+               "J.K. Rowling"
+            ]
+         }
+      }
+   },
+   {
+      "id": 59,
+      "query": "The works of Agatha Christie",
+      "description": "names (single author)",
+      "expected": {
+         "content": "The works of Agatha Christie",
+         "filters": {
+            "names": [
+               "Agatha Christie"
+            ]
+         }
+      }
+   }
 ]

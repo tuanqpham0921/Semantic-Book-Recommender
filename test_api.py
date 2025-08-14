@@ -1,5 +1,6 @@
 import requests
 import sys
+import json
 
 recommend_books_url = "http://localhost:8000/recommend_books"
 reason_query_url    = "http://localhost:8000/reason_query"
@@ -10,6 +11,8 @@ prompts = [
     "a 300 page or more books by Stephen King with a sad tone and take place in Maine",
     "get me books by Stephen King and J.K. Rowling"
 ]
+
+filters_names = ["genre", "author", "pages_min", "pages_max", "tone", "children", "names"]
 #===================================================================
 
 def print_result(result, query):
@@ -90,6 +93,11 @@ def filter_remove_none(filters):
     return result
 
 def get_reasoning(query, payload):
+    print()
+    print("-" * 110)
+    print(f"REASONING QUERY: \n{query}\n")
+
+
     response = requests.post(reason_query_url, json=payload, headers=headers)
 
     if not response.ok:
@@ -99,25 +107,12 @@ def get_reasoning(query, payload):
     reasoning = response.json()
     # filters = filter_remove_none(reasoning["filters"])
     # reasoning["filters"] = filters
-
+    
     return reasoning
 
-def main():
-    prompts = [
-        "a book about forgiveness",
-        "a 300 page or more books by Stephen King with a sad tone and take place in Maine",
-        "get me books by Stephen King and J.K. Rowling"
-    ]
+def process_query(query, payload, reasoning):
 
-    # If a query is passed as an argument, use it; otherwise use default
-    if len(sys.argv) > 1:
-        query = " ".join(sys.argv[1:])
-    else:
-        query = prompts[1]
-
-    payload = {"description": query}
-    reasoning = get_reasoning(query, payload)
-    print(f"REASONING: \n{reasoning}")
+    print(f"PROCESSING QUERY: \n{query}")
 
     recommend_book_payload = {**payload, **reasoning}
     response = requests.post(recommend_books_url, json=recommend_book_payload, headers=headers)
@@ -138,6 +133,51 @@ def main():
 
     print_validation(result["validation"])
     print()
+
+    return 
+
+
+
+
+def print_difference_reasoning(actual, expected):
+    # if they are the same then skip
+    
+    # Remove null values from actual filters
+    actual_cleaned = {}
+    actual_cleaned["content"] = actual["content"]
+    actual_cleaned["filters"] = None
+
+    if actual.get("filters"):
+        actual_cleaned["filters"] = {k: v for k, v in actual["filters"].items() if v is not None}
+        if len(actual_cleaned["filters"]) == 0:
+            actual_cleaned["filters"] = None
+
+    print("DIFFERENCE REASONING:")
+    print("Actual:")
+    print(json.dumps(actual_cleaned, indent=2))
+    print("\nExpected:")
+    print(json.dumps(expected, indent=2))
+
+    print("\n")
+    if actual_cleaned == expected:
+        print("NO:  differences found.")
+    else:
+        print("YES:  differences found.")
+
+def main():
+    # open the json file data_processing/etc/description_test_50.json
+    with open("data_processing/etc/description_test_50.json", "r") as f:
+        data = json.load(f)
+
+    for item in data:
+        payload = {"description": item["query"]}
+        reasoning = get_reasoning(item["query"], payload)
+        # result = process_query(item["query"], payload, reasoning)
+
+        expected_reasoning = item["expected"]
+        print_difference_reasoning(reasoning, expected_reasoning)
+
+        print("-" * 110)
 
 
 if __name__ == "__main__":
