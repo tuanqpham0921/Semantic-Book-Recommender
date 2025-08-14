@@ -4,7 +4,7 @@ from typing import List
 import pandas as pd
 
 # Import models and configuration
-from app.models import QueryRequest, BookRecommendation, ReasoningResponse, RecommendBooksRequest
+from app.models import QueryRequest, BookRecommendation, ReasoningResponse, RecommendBooksRequest, BookRecommendationResponse
 from app.config import add_cors_middleware, db_books, BOOKS_PATH
 
 # Import filter_query module from app folder
@@ -47,13 +47,13 @@ def reason_query_endpoint(request: QueryRequest):
     return {"content": content, "filters": filters}
 
 # Endpoint to recommend books based on user query
-@app.post("/recommend_books", response_model=List[BookRecommendation])
+@app.post("/recommend_books", response_model=BookRecommendationResponse)
 def recommend_books(request: RecommendBooksRequest):
     logger_separator()
     logger.info(f"\nREQUEST: {request}")
     logger_separator()
 
-    filters = request.filters
+    filters = request.filters.dict()
     logger.info(f"FILTERS:\n {filters}")
     logger_separator()
 
@@ -66,8 +66,10 @@ def recommend_books(request: RecommendBooksRequest):
     logger.info(f"BOOK LEN: {len(books)}")
     logger_separator()
 
+    # make a filtervalidation
+    filterValidation = {}
     # apply pre-filters to the books
-    books = filter_df.apply_pre_filters(books, filters)
+    books = filter_df.apply_pre_filters(books, filters, filterValidation)
     logger.info(f"\nPRE-FILTER BOOK LEN: {len(books)}")
     logger_separator()
 
@@ -87,12 +89,17 @@ def recommend_books(request: RecommendBooksRequest):
         logger.info(f"ISBN: {row['isbn13']}, Title: {row['title']}, Authors: {row['authors']}")
     
     logger_separator()
-    
-    # Convert DataFrame rows to BookRecommendation objects
-    return [
-        BookRecommendation(**row.to_dict())
-        for _, row in books.iterrows()
-    ]
+
+    # compose the response for recommend_books
+    return BookRecommendationResponse(
+        recommendations = [
+            BookRecommendation(**row.to_dict())
+            for _, row in books.iterrows()
+        ],
+        validation = filterValidation,
+        filters = filters,
+        content = content
+    )
 
 
 # place holder for API root endpoint

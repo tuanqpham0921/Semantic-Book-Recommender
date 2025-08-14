@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import Union, List, Optional
 
 # Define Query Body
 class QueryRequest(BaseModel):
@@ -50,3 +50,25 @@ class BookRecommendation(BaseModel):
 
     class Config:
         extra = 'allow'  # Allow extra fields if necessary
+
+# log the filtering
+class ValidationLog(BaseModel):
+    applied: bool
+    num_books_after: int
+    filter_value: Optional[Union[str, List[str], int]] = None
+    status: str # "success", "failed", "skipped"
+    error: Optional[str] = None  # Only populated if status == "failed"
+
+class FilterValidationLog(BaseModel):
+    applied_author: Optional[ValidationLog] = None
+    applied_genre:  Optional[ValidationLog] = None
+    applied_min_pages:  Optional[ValidationLog] = None
+    applied_max_pages:  Optional[ValidationLog] = None
+    # applied_children: Optional[ValidationLog] = None
+    # applied_tone:   Optional[ValidationLog] = None
+
+class BookRecommendationResponse(BaseModel):
+    recommendations: List[BookRecommendation]
+    validation: FilterValidationLog
+    filters: FilterSchema
+    content: str
