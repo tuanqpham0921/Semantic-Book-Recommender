@@ -181,7 +181,7 @@ def batch_test():
 #================================================
 #================================================
 def single_test():
-    query = "get me a book about love with more than 333 pages"
+    query = "non fiction book about love"
 
     payload = {"description": query}
     
