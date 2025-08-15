@@ -1,5 +1,6 @@
 # Use an official Python base image
-FROM python:3.11-slim
+# use Linux/AMD64 for GCP
+FROM --platform=linux/amd64 python:3.11-slim
 
 # Set the working directory
 WORKDIR /app
@@ -11,6 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Only Copy what's needed for the app to run
 COPY main.py ./
+COPY app/ ./app/
 COPY data/books.parquet ./data/
 COPY data/chroma_db/ ./data/chroma_db/
 

@@ -1,154 +1,106 @@
-import os
 import logging
 from fastapi import FastAPI
-from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List
 import pandas as pd
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+
+# Import models and configuration
+from app.models import QueryRequest, BookRecommendation, ReasoningResponse, RecommendBooksRequest, BookRecommendationResponse
+from app.config import add_cors_middleware, db_books, BOOKS_PATH
+
+# Import filter_query module from app folder
+import app.filter_query as filter_query
+import app.filter_df as filter_df
+from app.search import similarity_search_filtered
+
+# Configure middleware
+app = FastAPI()
+add_cors_middleware(app)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
-# Assuming you have ChromaDB and your embedding function loaded here
-from langchain_chroma import Chroma
-from langchain_openai import OpenAIEmbeddings
+# Suppress HTTP request logs from OpenAI and other libraries
+logging.getLogger("openai").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 
-# from dotenv import load_dotenv
-# load_dotenv()
+# how many book we want to return
+SIMILAR_K = 50
+FINAL_K   = 10
+DEBUG_K   = 5
 
-# Load environment variables
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", "./data/chroma_db")
-BOOKS_PATH = os.getenv("BOOKS_PATH", "./data/books.parquet")
+def logger_separator():
+    logger.info("\n" + "="*50 + "\n")
 
-# Load ChromaDB
-db_books = Chroma(
-    persist_directory=CHROMA_DB_PATH,
-    embedding_function=OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
-)
-books = pd.read_parquet(BOOKS_PATH)
+@app.post("/reason_query", response_model=ReasoningResponse)
+def reason_query_endpoint(request: QueryRequest):
+    filters = filter_query.assemble_filters(request.description)
+    # logger.info(f"FILTERS:\n {filters}")
+    # logger_separator()
 
-app = FastAPI()
+    content = filter_query.extract_content(request.description, filters)
+    # logger.info(f"CONTENT:\n {content}")
+    # logger_separator()
 
-from fastapi.middleware.cors import CORSMiddleware
-
-# Add CORS middleware to allow cross-origin requests
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "https://tuanqpham0921.com",
-        "https://www.tuanqpham0921.com"
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Define Request Body
-class RecommendationRequest(BaseModel):
-    description: str
-    filters: Optional[dict] = None  # Optional filters like pages, genre, etc.
-
-# Define Response with all requested fields
-class BookRecommendation(BaseModel):
-    isbn13: str = Field(default="")
-    title: str = Field(default="")
-    authors: str = Field(default="")
-    categories: Optional[str] = Field(default=None)
-    thumbnail: str = Field(default="")
-    description: str = Field(default="")
-    published_year: Optional[int] = Field(default=None)
-    average_rating: float = Field(default=0.0)
-    num_pages: Optional[int] = Field(default=None) # allow for nullable integers
-    ratings_count: Optional[int] = Field(default=None)
-    title_and_subtiles: str = Field(default="")
-    tagged_description: str = Field(default="")
-    simple_categories: str = Field(default="")
-    anger: float = Field(default=0.0)
-    disgust: float = Field(default=0.0)
-    fear: float = Field(default=0.0)
-    joy: float = Field(default=0.0)
-    sadness: float = Field(default=0.0)
-    surprise: float = Field(default=0.0)
-    neutral: float = Field(default=0.0)
-
-    class Config:
-        extra = 'allow'  # Allow extra fields if necessary
-
-# filter mapping for tones
-# This maps the tone names to the corresponding column names in the DataFrame.
-tone_mapping = {
-    "Happy": "joy",
-    "Surprising": "surprise",
-    "Angry": "anger",
-    "Suspenseful": "fear",
-    "Sad": "sadness"
-}
-
-# Performs a semantic search using the ChromaDB 
-# to retrieve book recommendations based on the input query.
-def retrieve_semantic_recommendations(
-        query: str,
-        category: str = "All",
-        tone: str = "All",
-        max_pages: Optional[int] = None,
-        initial_top_k: int = 50,
-        final_top_k: int = 10
-) -> pd.DataFrame:
-    recs = db_books.similarity_search(query, k=initial_top_k)
-    books_list = [rec.page_content.strip('"').split()[0] for rec in recs]
-    book_recs = books[books["isbn13"].isin(books_list)].head(initial_top_k)
-    logger.info(f"Found {len(book_recs)} books matching the query.")
-
-    # filter out the max number of pages if provided
-    if max_pages is not None:
-        book_recs = book_recs[book_recs["num_pages"] <= max_pages]
-        logger.info(f"Has {len(book_recs)} books after max_pages: {max_pages} filter.")
-
-    # if category is not "All", filter by category
-    if category != "All":
-        book_recs = book_recs[book_recs["simple_categories"] == category]
-        logger.info(f"Has {len(book_recs)} books after category: {category} filter.")
-
-
-    # only get the top recommendations based on the tone
-    if tone != "All" and tone in tone_mapping:
-        book_recs.sort_values(by=tone_mapping[tone], ascending=False, inplace=True)
-        logger.info(f"Has {len(book_recs)} books after tone: {tone} filter.")
-
-    # log the number of books after all filters
-    if len(book_recs) == 0:
-        logger.warning("No books found matching the query after all filters.")
-        return pd.DataFrame()
-    elif len(book_recs) < final_top_k:
-        logger.warning(f"Less than the requested number of {final_top_k} recommendations available.")
-        return book_recs
-
-    # get the top ten recommendations
-    return book_recs.head(final_top_k)
-    
+    return {"content": content, "filters": filters}
 
 # Endpoint to recommend books based on user query
-@app.post("/recommend_books", response_model=List[BookRecommendation])
-def recommend_books(request: RecommendationRequest):
-    logger.info(f"request: {request}")
+@app.post("/recommend_books", response_model=BookRecommendationResponse)
+def recommend_books(request: RecommendBooksRequest):
+    # logger_separator()
+    # logger.info(f"\nREQUEST: {request}")
+    # logger_separator()
 
-    # Embed user query
-    df = retrieve_semantic_recommendations(request.description,
-                                           request.filters["category"],
-                                           request.filters["tone"],
-                                           request.filters.get("max_pages", None))
+    filters = request.filters.dict()
+    # logger.info(f"FILTERS:\n {filters}")
+    # logger_separator()
 
-    # Convert DataFrame rows to BookRecommendation objects
-    recommendations = [
-        BookRecommendation(**row.to_dict())
-        for _, row in df.iterrows()
-    ]
+    content = request.content
+    # logger.info(f"CONTENT:\n {content}")
+    # logger_separator()
 
-    # Log the number of recommendations and their details
-    logger.info(f"Returning {len(recommendations)} recommendations.")
-    for rec in recommendations[:10]:
-        logger.info(f"ISBN: {rec.isbn13}, Title: {rec.title}, Authors: {rec.authors}")
+    # load in a fresh patch of books
+    books = pd.read_parquet(BOOKS_PATH)
+    # logger.info(f"BOOK LEN: {len(books)}")
+    # logger_separator()
 
-    return recommendations
+    # make a filtervalidation
+    filterValidation = {}
+    # apply pre-filters to the books
+    books = filter_df.apply_pre_filters(books, filters, filterValidation)
+    # logger.info(f"\nPRE-FILTER BOOK LEN: {len(books)}")
+    # logger_separator()
+
+    # Perform semantic search on the filtered books
+    books = similarity_search_filtered(content, books, db_books, SIMILAR_K)
+    # logger.info(f"\nPOST-SEARCH BOOK LEN: {len(books)}")
+    # logger_separator()
+
+    # apply the post-filters
+    books = filter_df.apply_post_filters(books, filters, filterValidation, FINAL_K)
+    # logger.info(f"\nPOST-FILTER BOOK LEN: {len(books)}")
+    # logger_separator()
+
+    # # Log the number of recommendations and their details
+    # logger.info(f"Returning {len(books)} recommendations:\n")
+    # for _, row in books.head(DEBUG_K).iterrows():
+    #     logger.info(f"ISBN: {row['isbn13']}, Title: {row['title']}, Authors: {row['authors']}")
+    
+    # logger_separator()
+
+    # compose the response for recommend_books
+    return BookRecommendationResponse(
+        recommendations = [
+            BookRecommendation(**row.to_dict())
+            for _, row in books.iterrows()
+        ],
+        validation = filterValidation,
+        filters = filters,
+        content = content
+    )
+
 
 # place holder for API root endpoint
 @app.get("/")
