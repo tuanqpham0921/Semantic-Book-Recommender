@@ -41,3 +41,7 @@ clean:
 	find . -type f -name "*.pyc" -delete
 	find . -type d -name "__pycache__" -delete
 	find . -type d -name ".pytest_cache" -exec rm -rf {} +
+
+# tuanqpham0921/semantic-book-recommender-dev@sha256:...
+GCP-dev:
+	docker buildx build --platform linux/amd64 -t tuanqpham0921/semantic-book-recommender-dev:latest --push .
