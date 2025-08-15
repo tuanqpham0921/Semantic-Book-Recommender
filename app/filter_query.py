@@ -1,6 +1,7 @@
 import json
 import os
 import pandas as pd
+import re
 from typing import Optional, Dict, Any, List
 from openai import OpenAI
 
@@ -98,10 +99,27 @@ _GENRE_SYS = (
     "Return JSON for the schema. Set genre ONLY if the query literally contains "
     "the word 'fiction' OR a non-fiction variant ('non-fiction', 'nonfiction', 'non fiction', any case). "
     "Normalize any non-fiction variant to 'non-fiction'. If not present, genre=null. Do not infer from 'sci-fi' etc."
+    "Out put can only be 'Fiction' or 'Nonfiction' case sensitive"
 )
+
+NONFICTION_RE = re.compile(r'(?<![A-Za-z])non[^A-Za-z]*fiction', re.I)
+FICTION_RE    = re.compile(r'(?<![A-Za-z])fiction', re.I)
+
+def standardized_genre(genre_text: str) -> Optional[str]:
+    genre_text = genre_text.strip().lower()
+    if not genre_text: return None
+
+    if NONFICTION_RE.search(genre_text): return "Nonfiction"
+    if FICTION_RE.search(genre_text):    return "Fiction"
+    return genre_text
+
 def extract_genre(query: str) -> Optional[str]:
     out = _so(query, _GENRE_SYS, _GENRE_SCHEMA)
-    return out["genre"]
+
+    # None or it's an empty string
+    if not out["genre"]: return None
+    
+    return standardized_genre(out["genre"])
 
 # -----------------------
 # 4) Children flag

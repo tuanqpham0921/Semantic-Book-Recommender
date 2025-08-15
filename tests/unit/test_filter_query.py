@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from app.filter_query import (
     extract_tone, extract_pages, extract_genre, 
     extract_children, extract_names, extract_authors,
-    assemble_filters, extract_query_filters
+    assemble_filters, extract_query_filters, standardized_genre
 )
 
 class TestFilterQueryMocked:
@@ -191,3 +191,114 @@ class TestFilterQueryMocked:
         # Should raise an exception
         with pytest.raises(json.JSONDecodeError):
             extract_tone("test query")
+
+
+class TestStandardizedGenre:
+    """Test cases for the standardized_genre function using regex patterns."""
+
+    def test_basic_fiction_cases(self):
+        """Test standard fiction cases."""
+        assert standardized_genre("fiction") == "Fiction"
+        assert standardized_genre("Fiction") == "Fiction"
+        assert standardized_genre("FICTION") == "Fiction"
+
+    def test_basic_nonfiction_cases(self):
+        """Test standard non-fiction cases."""
+        assert standardized_genre("non-fiction") == "Nonfiction"
+        assert standardized_genre("nonfiction")  == "Nonfiction"
+        assert standardized_genre("non fiction") == "Nonfiction"
+        assert standardized_genre("Non-Fiction") == "Nonfiction"
+        assert standardized_genre("NONFICTION")  == "Nonfiction"
+
+    def test_fiction_with_extra_characters(self):
+        """Test fiction words with extra characters attached."""
+        assert standardized_genre("fiction12") == "Fiction"
+        assert standardized_genre("123fiction") == "Fiction"
+        assert standardized_genre("science-fiction") == "Fiction"
+        assert standardized_genre("historical-fiction") == "Fiction"
+        assert standardized_genre("fictionbook") == "Fiction"
+
+        assert standardized_genre("afictionbook") == "afictionbook"
+        assert standardized_genre("abcdfictionbook") == "abcdfictionbook"
+        assert standardized_genre("non123fiction") == "Nonfiction"
+
+        # anything with a -fiction will be fiction (if it's not a non-fiction)
+        assert standardized_genre("abcd-fiction") == "Fiction"
+        assert standardized_genre("nonabcd-fiction") == "Fiction"
+
+
+    def test_nonfiction_with_extra_characters(self):
+        """Test non-fiction words with extra characters attached."""
+        assert standardized_genre("nonfiction123") == "Nonfiction"
+        assert standardized_genre("123nonfiction") == "Nonfiction"
+        assert standardized_genre("nonfictiongsf") == "Nonfiction"
+        assert standardized_genre("non-fictionbook") == "Nonfiction"
+
+    def test_nonfiction_takes_priority(self):
+        """Test that non-fiction is correctly identified even when 'fiction' is also present."""
+        assert standardized_genre("non-fiction") == "Nonfiction"
+        assert standardized_genre("nonfiction") == "Nonfiction"
+        assert standardized_genre("non fiction book") == "Nonfiction"
+        
+    def test_words_containing_fiction_but_not_fiction(self):
+        """Test that words containing 'fiction' but not actually 'fiction' are not matched."""
+        # These should not be classified as Fiction because they don't have word boundaries
+        assert standardized_genre("confection") == "confection"
+        assert standardized_genre("affection") == "affection"
+        assert standardized_genre("infection") == "infection"
+        assert standardized_genre("sci-fi") == "sci-fi"
+
+    def test_complex_genre_descriptions(self):
+        """Test more complex genre descriptions."""
+        assert standardized_genre("science fiction adventure") == "Fiction"
+        assert standardized_genre("historical non-fiction") == "Nonfiction"
+        assert standardized_genre("young adult fiction") == "Fiction"
+        assert standardized_genre("business nonfiction") == "Nonfiction"
+
+    def test_edge_cases_with_punctuation(self):
+        """Test edge cases with punctuation and special characters."""
+        assert standardized_genre("fiction.") == "Fiction"
+        assert standardized_genre("fiction!") == "Fiction"
+        assert standardized_genre("fiction?") == "Fiction"
+        assert standardized_genre("non-fiction.") == "Nonfiction"
+        assert standardized_genre("(fiction)") == "Fiction"
+        assert standardized_genre("[nonfiction]") == "Nonfiction"
+
+    def test_non_genre_words(self):
+        """Test that non-genre words are returned unchanged."""
+        assert standardized_genre("mystery") == "mystery"
+        assert standardized_genre("romance") == "romance"
+        assert standardized_genre("sci-fi") == "sci-fi"
+        assert standardized_genre("fantasy") == "fantasy"
+        assert standardized_genre("thriller") == "thriller"
+        assert standardized_genre("biography") == "biography"
+
+    def test_empty_and_none_cases(self):
+        """Test edge cases with empty strings."""
+        assert standardized_genre("") == None
+        assert standardized_genre("   ") == None
+
+    def test_mixed_case_scenarios(self):
+        """Test various case combinations."""
+        assert standardized_genre("ScIeNcE-FiCtIoN") == "Fiction"
+        assert standardized_genre("NoN-FiCtIoN") == "Nonfiction"
+        assert standardized_genre("HISTORICAL FICTION") == "Fiction"
+        assert standardized_genre("medical nonfiction") == "Nonfiction"
+
+    def test_multiple_spaces_and_hyphens(self):
+        """Test handling of multiple spaces and different hyphen patterns."""
+        assert standardized_genre("non  fiction") == "Nonfiction"  # Multiple spaces
+        assert standardized_genre("non--fiction") == "Nonfiction"  # Double hyphen (not matched by pattern)
+        assert standardized_genre("non_fiction") == "Nonfiction"  # Underscore (not matched by pattern)
+        assert standardized_genre("nonsazcfiction") == "nonsazcfiction"  # should not work
+
+
+    def test_partial_word_matches(self):
+        """Test that partial word matches are handled correctly."""
+        # These should match because finctional -> fiction
+        assert standardized_genre("fictional") == "Fiction"
+        assert standardized_genre("nonfictional") == "Nonfiction"
+        
+        # These SHOULD match because they have proper word boundaries
+        assert standardized_genre("fiction-based") == "Fiction"  # Word boundary at start
+        assert standardized_genre("pure fiction") == "Fiction"  # Word boundary at end
