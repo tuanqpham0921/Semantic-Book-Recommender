@@ -11,7 +11,7 @@ from app.filter_validation import (
 logger = logging.getLogger(__name__)
 
 filter_categories = ("tone", "pages_max", "pages_min", "genre", "children", "names")
-genre_options = ("Fiction", "Non-Fiction", "Children's Fiction", "Children's Non-Fiction")
+genre_options = ("Fiction", "Nonfiction", "Children's Fiction", "Children's Nonfiction")
 tone_options = ("joy", "surprise", "anger", "fear", "sadness")
 
 # perform the pre filters like Authors, Genre, and Pages
@@ -29,8 +29,8 @@ def apply_pre_filters(books: pd.DataFrame, filters: dict, filterValidation: dict
         validate_author_filter(books, authors, filterValidation)
         
 
-    # get the Fiction/Non-Fiction genre first
-    if "genre" in filters and filters["genre"] in ["Fiction", "Non-Fiction"]:
+    # get the Fiction/Nonfiction genre first
+    if "genre" in filters and filters["genre"] in ["Fiction", "Nonfiction"]:
         logger.info("APPLYING genre filter")
         genre = filters["genre"]
         if "children" in filters and filters["children"]:
