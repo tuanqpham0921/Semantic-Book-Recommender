@@ -29,7 +29,7 @@ class RecommendBooksRequest(BaseModel):
 class BookRecommendation(BaseModel):
     isbn13: str = Field(default="")
     title: str = Field(default="")
-    authors: str = Field(default="")
+    authors: Union[str, None] = Field(default="")
     categories: Optional[str] = Field(default=None)
     thumbnail: str = Field(default="")
     description: str = Field(default="")
