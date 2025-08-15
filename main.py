@@ -37,58 +37,58 @@ def logger_separator():
 @app.post("/reason_query", response_model=ReasoningResponse)
 def reason_query_endpoint(request: QueryRequest):
     filters = filter_query.assemble_filters(request.description)
-    logger.info(f"FILTERS:\n {filters}")
-    logger_separator()
+    # logger.info(f"FILTERS:\n {filters}")
+    # logger_separator()
 
     content = filter_query.extract_content(request.description, filters)
-    logger.info(f"CONTENT:\n {content}")
-    logger_separator()
+    # logger.info(f"CONTENT:\n {content}")
+    # logger_separator()
 
     return {"content": content, "filters": filters}
 
 # Endpoint to recommend books based on user query
 @app.post("/recommend_books", response_model=BookRecommendationResponse)
 def recommend_books(request: RecommendBooksRequest):
-    logger_separator()
-    logger.info(f"\nREQUEST: {request}")
-    logger_separator()
+    # logger_separator()
+    # logger.info(f"\nREQUEST: {request}")
+    # logger_separator()
 
     filters = request.filters.dict()
-    logger.info(f"FILTERS:\n {filters}")
-    logger_separator()
+    # logger.info(f"FILTERS:\n {filters}")
+    # logger_separator()
 
     content = request.content
-    logger.info(f"CONTENT:\n {content}")
-    logger_separator()
+    # logger.info(f"CONTENT:\n {content}")
+    # logger_separator()
 
     # load in a fresh patch of books
     books = pd.read_parquet(BOOKS_PATH)
-    logger.info(f"BOOK LEN: {len(books)}")
-    logger_separator()
+    # logger.info(f"BOOK LEN: {len(books)}")
+    # logger_separator()
 
     # make a filtervalidation
     filterValidation = {}
     # apply pre-filters to the books
     books = filter_df.apply_pre_filters(books, filters, filterValidation)
-    logger.info(f"\nPRE-FILTER BOOK LEN: {len(books)}")
-    logger_separator()
+    # logger.info(f"\nPRE-FILTER BOOK LEN: {len(books)}")
+    # logger_separator()
 
     # Perform semantic search on the filtered books
     books = similarity_search_filtered(content, books, db_books, SIMILAR_K)
-    logger.info(f"\nPOST-SEARCH BOOK LEN: {len(books)}")
-    logger_separator()
+    # logger.info(f"\nPOST-SEARCH BOOK LEN: {len(books)}")
+    # logger_separator()
 
     # apply the post-filters
     books = filter_df.apply_post_filters(books, filters, filterValidation, FINAL_K)
-    logger.info(f"\nPOST-FILTER BOOK LEN: {len(books)}")
-    logger_separator()
+    # logger.info(f"\nPOST-FILTER BOOK LEN: {len(books)}")
+    # logger_separator()
 
-    # Log the number of recommendations and their details
-    logger.info(f"Returning {len(books)} recommendations:\n")
-    for _, row in books.head(DEBUG_K).iterrows():
-        logger.info(f"ISBN: {row['isbn13']}, Title: {row['title']}, Authors: {row['authors']}")
+    # # Log the number of recommendations and their details
+    # logger.info(f"Returning {len(books)} recommendations:\n")
+    # for _, row in books.head(DEBUG_K).iterrows():
+    #     logger.info(f"ISBN: {row['isbn13']}, Title: {row['title']}, Authors: {row['authors']}")
     
-    logger_separator()
+    # logger_separator()
 
     # compose the response for recommend_books
     return BookRecommendationResponse(
