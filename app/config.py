@@ -4,7 +4,7 @@ from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
 
-# load_dotenv()
+load_dotenv()
 
 # Load environment variables
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -23,8 +23,7 @@ def add_cors_middleware(app):
         CORSMiddleware,
         allow_origins=[
             "https://tuanqpham0921.com",
-            "https://www.tuanqpham0921.com",
-            "*" # need for Dev
+            "https://www.tuanqpham0921.com"
         ],
         allow_credentials=True,
         allow_methods=["*"],
