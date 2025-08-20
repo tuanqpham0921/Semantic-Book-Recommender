@@ -106,7 +106,7 @@ def test_apply_pre_filters_children_fiction(sample_books):
 
 def test_apply_pre_filters_children_non_fiction(sample_books):
     """Test children's non-fiction filtering"""
-    filters = {'genre': 'Non-Fiction', 'children': True}
+    filters = {'genre': 'Nonfiction', 'children': True}
     filterValidation = {}
     result = apply_pre_filters(sample_books, filters, filterValidation)
     
@@ -114,7 +114,7 @@ def test_apply_pre_filters_children_non_fiction(sample_books):
     assert len(result) == 1  # National Geographic Kids Almanac
     
     # All results should be Children's Non-Fiction
-    assert all(category == "Children's Non-Fiction" for category in result['simple_categories'])
+    assert all(category == "Children's Nonfiction" for category in result['simple_categories'])
     
     # Should be the National Geographic book
     assert result.iloc[0]['title'] == 'National Geographic Kids Almanac 2023'
