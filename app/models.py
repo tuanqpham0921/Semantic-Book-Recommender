@@ -56,9 +56,9 @@ class ValidationLog(BaseModel):
     applied: bool
     num_books_before: int
     num_books_after: int
-    filter_value: Optional[Union[str, List[str], int, dict]] = None
+    filter_value: Union[str, List[str], int, dict]
     status: str # "success", "failed", "skipped"
-    error: Optional[str] = None  # Only populated if status == "failed"
+    message: str
 
 class FilterValidationLog(BaseModel):
     applied_author: Optional[ValidationLog] = None
@@ -75,3 +75,6 @@ class BookRecommendationResponse(BaseModel):
     validation: FilterValidationLog
     filters: FilterSchema
     content: str
+
+class OverallExplanationResponse(BaseModel):
+    explain_overall_recommendation: str
