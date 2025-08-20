@@ -2,8 +2,10 @@
 
 A smart book recommendation system that leverages a Vector Database to provide personalized, context-driven recommendations.
 
-🌐 **[Try the Live Demo!](https://tuanqpham0921.com/book-recommender)**
-📖 **[Read the Blog](https://medium.com/@tuanqpham0921/book-recommender-project-347a85a9d4ea)**
+## Newest Version 2.0.0
+
+🌐 **[Try the Latest Demo!](https://tuanqpham0921.com/book-recommender)**
+📖 **[Read the Blog](https://medium.com/@tuanqpham0921/book-recommender-v2-blog-d1f57fdc2fcf)**
 
 ---
 
@@ -26,6 +28,7 @@ This project uses **Semantic Search** to recommend books based on user descripti
   - Google Cloud Build (CI/CD pipeline)
 - **Data Format**: Parquet files for optimized storage and retrieval
 - **Data Models & Validation**: Pydantic for schema validation and API request handling
+- **Unit Tests**: uses PyTest to make sure functions are working correctly
 
 ---
 
