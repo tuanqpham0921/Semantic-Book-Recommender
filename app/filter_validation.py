@@ -74,6 +74,45 @@ def validate_max_pages_filter(books: pd.DataFrame, max_pages: int, filterValidat
     # everything is good
     maxPagesValidation["status"] = "success"
 
+# make sure that all the published years meet the criteria
+def validate_published_year_filter(books: pd.DataFrame, published_year: dict, filterValidation: dict = None):
+    filterValidation["applied_published_year"] = {}
+    yearValidation = filterValidation["applied_published_year"]
+
+    published_year_min = published_year.get("min", None)
+    published_year_max = published_year.get("max", None)
+    published_year_exact = published_year.get("exact", None)
+
+    yearValidation["applied"] = True
+    yearValidation["num_books_after"] = len(books)
+    yearValidation["filter_value"] = published_year
+
+    for index, book in books.iterrows():
+        book_year = book.get("published_year", None)
+
+        if not book_year: continue
+        
+        # Handle exact year match first (takes priority)
+        if published_year_exact is not None:
+            if book_year != published_year_exact:
+                yearValidation["error"] = f"Failed Exact Published Year Filter, has {book_year}, expected {published_year_exact}"
+                yearValidation["status"] = "failed"
+                return
+        else:
+            # Handle min/max year range
+            if published_year_min is not None and book_year <= published_year_min:
+                yearValidation["error"] = f"Failed Min Published Year Filter, has {book_year}, expected >= {published_year_min}"
+                yearValidation["status"] = "failed"
+                return
+            
+            if published_year_max is not None and book_year >= published_year_max:
+                yearValidation["error"] = f"Failed Max Published Year Filter, has {book_year}, expected < {published_year_max}"
+                yearValidation["status"] = "failed"
+                return
+    
+    # everything is good
+    yearValidation["status"] = "success"
+
 
 
 #------------------------------------------------------

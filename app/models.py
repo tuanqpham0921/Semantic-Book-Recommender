@@ -14,7 +14,7 @@ class FilterSchema(BaseModel):
     tone: Optional[str] = Field(default=None)
     children: Optional[bool] = Field(default=None)
     names: Optional[List[str]] = Field(default=None)
-    # published_year: Optional[int] = Field(default=None)
+    published_year: Optional[dict] = Field(default=None)
 
 class ReasoningResponse(BaseModel):
     filters: FilterSchema
@@ -55,7 +55,7 @@ class BookRecommendation(BaseModel):
 class ValidationLog(BaseModel):
     applied: bool
     num_books_after: int
-    filter_value: Optional[Union[str, List[str], int]] = None
+    filter_value: Optional[Union[str, List[str], int, dict]] = None
     status: str # "success", "failed", "skipped"
     error: Optional[str] = None  # Only populated if status == "failed"
 
@@ -66,6 +66,8 @@ class FilterValidationLog(BaseModel):
     applied_max_pages: Optional[ValidationLog] = None
     applied_keywords:  Optional[ValidationLog] = None
     applied_tone:     Optional[ValidationLog] = None
+    applied_published_year: Optional[ValidationLog] = None
+
 
 class BookRecommendationResponse(BaseModel):
     recommendations: List[BookRecommendation]
