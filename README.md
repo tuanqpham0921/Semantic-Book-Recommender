@@ -2,10 +2,12 @@
 
 A smart book recommendation system that leverages a Vector Database to provide personalized, context-driven recommendations.
 
-## Newest Version 2.0.0
-
 🌐 **[Try the Latest Demo!](https://tuanqpham0921.com/book-recommender)**
 📖 **[Read the Blog](https://medium.com/@tuanqpham0921/book-recommender-v2-blog-d1f57fdc2fcf)**
+
+
+## Newest Version 2.1.0
+* added the published year to smart filter
 
 ---
 
