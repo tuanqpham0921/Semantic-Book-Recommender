@@ -1,4 +1,5 @@
 import os
+import json
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
@@ -11,6 +12,10 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", "./data/chroma_db")
 BOOKS_PATH = os.getenv("BOOKS_PATH", "./data/books.parquet")
+
+# OpenAI client configuration
+client = OpenAI()
+MODEL = "gpt-4o-mini-2024-07-18"
 
 # Load ChromaDB
 db_books = Chroma(
