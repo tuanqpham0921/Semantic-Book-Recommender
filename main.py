@@ -4,13 +4,18 @@ from typing import List
 import pandas as pd
 
 # Import models and configuration
-from app.models import QueryRequest, BookRecommendation, ReasoningResponse, RecommendBooksRequest, BookRecommendationResponse
+from app.models import (
+    QueryRequest, BookRecommendation, 
+    ReasoningResponse, RecommendBooksRequest, 
+    BookRecommendationResponse, OverallExplanationResponse
+)
 from app.config import add_cors_middleware, db_books, BOOKS_PATH
 
 # Import filter_query module from app folder
 import app.filter_query as filter_query
 import app.filter_df as filter_df
 from app.search import similarity_search_filtered
+import app.generate_reason as generate_reason
 
 # Configure middleware
 app = FastAPI()
@@ -45,6 +50,13 @@ def reason_query_endpoint(request: QueryRequest):
     # logger_separator()
 
     return {"content": content, "filters": filters}
+
+
+# @app.post("/explain_overall_recommendation", response_model=OverallExplanationResponse)
+# def explain_overall_recommendation(request: BookRecommendationResponse):
+#     explanation = generate_reason.explain_overall_recommendation(request)
+
+#     return {"explain_overall_recommendation": explanation}
 
 # Endpoint to recommend books based on user query
 @app.post("/recommend_books", response_model=BookRecommendationResponse)

@@ -71,12 +71,12 @@ def print_validation(validation):
 
         print(f"{key.capitalize()}:")
         print("  applied:", value["applied"])
+        print("  num_books_before:", value["num_books_before"])
         print("  num_books_after:", value["num_books_after"])
         print("  filter_value:", value["filter_value"])
         print()
         print("  status:", value["status"])
-        if value["status"] == "failed":
-            print("  Error:", value["error"])
+        print("  message:", value["message"])
 
         print("-" * 110)
 
@@ -190,7 +190,7 @@ def batch_test():
 #================================================
 #================================================
 def single_test():
-    query = "a book written publised in year 2019"
+    query = "300 page or more books by Stephen King with a sad tone and take place in Maine"
 
     payload = {"description": query}
     
@@ -202,8 +202,8 @@ def single_test():
 #================================================
 
 def main():
-    # single_test()
-    batch_test()
+    single_test()
+    # batch_test()
 
 
 if __name__ == "__main__":
