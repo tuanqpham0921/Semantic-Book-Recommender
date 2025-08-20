@@ -3,16 +3,8 @@ import os
 import pandas as pd
 import re
 from typing import Optional, Dict, Any, List
-from openai import OpenAI
 
-from dotenv import load_dotenv
-load_dotenv()
-
-# Load environment variables
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
-client = OpenAI()
-MODEL = "gpt-4o-mini-2024-07-18"
+from app.config import client, MODEL
 
 filter_categories = ["tone", "pages_max", "pages_min", "genre", "children", "names"]
 # Add published_year_exact to filter categories

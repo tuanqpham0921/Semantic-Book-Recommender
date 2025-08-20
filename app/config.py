@@ -2,6 +2,7 @@ import os
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
+from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
