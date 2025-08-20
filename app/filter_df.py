@@ -22,13 +22,13 @@ def apply_pre_filters(books: pd.DataFrame, filters: dict, filterValidation: dict
         logger.info("APPLYING authors filter")
         authors = filters["author"]
 
+        len_books_before = len(books)
         # Filter books where any of the specified authors appears in the authors field
         author_mask = books["authors"].str.contains('|'.join(authors), case=False, na=False, regex=True)
         books = books[author_mask]
         
         # now we validate author filtering
-        validate_author_filter(books, authors, filterValidation)
-        
+        validate_author_filter(books, authors, filterValidation, len_books_before)
 
     # get the Fiction/Nonfiction genre first
     if "genre" in filters and filters["genre"] in ["Fiction", "Nonfiction"]:
@@ -36,30 +36,35 @@ def apply_pre_filters(books: pd.DataFrame, filters: dict, filterValidation: dict
         genre = filters["genre"]
         if "children" in filters and filters["children"]:
             genre = "Children's " + genre
+        
+        len_books_before = len(books)
         books = books[books["simple_categories"] == genre]
 
         # now we validate genre filtering
-        validate_genre_filter(books, genre, filterValidation)
+        validate_genre_filter(books, genre, filterValidation, len_books_before)
 
     # min and max filter is last
     if "pages_min" in filters and filters["pages_min"] is not None:
         logger.info("APPLYING pages_min filter")
+        len_books_before = len(books)
         books = books[books["num_pages"] >= filters["pages_min"]]
         logger.info(f"Has {len(books)} books after pages_min: {filters['pages_min']} filter.")
 
-        validate_min_pages_filter(books, filters["pages_min"], filterValidation)
+        validate_min_pages_filter(books, filters["pages_min"], filterValidation, len_books_before)
 
     if "pages_max" in filters and filters["pages_max"] is not None:
         logger.info("APPLYING pages_max filter")
+        len_books_before = len(books)
         books = books[books["num_pages"] <= filters["pages_max"]]
         logger.info(f"Has {len(books)} books after pages_max: {filters['pages_max']} filter.")
 
-        validate_max_pages_filter(books, filters["pages_max"], filterValidation)
+        validate_max_pages_filter(books, filters["pages_max"], filterValidation, len_books_before)
 
     if "published_year" in filters and filters["published_year"] is not None:
         logger.info("APPLYING published_year filter")
         published_year = filters["published_year"]
 
+        len_books_before = len(books)
         # Check for exact year first (takes priority)
         if published_year.get("exact") is not None:
             books = books[books["published_year"] == published_year["exact"]]
@@ -70,7 +75,7 @@ def apply_pre_filters(books: pd.DataFrame, filters: dict, filterValidation: dict
         if published_year.get("max") is not None:
             books = books[books["published_year"] <= published_year["max"]]
 
-        validate_published_year_filter(books, published_year, filterValidation)
+        validate_published_year_filter(books, published_year, filterValidation, len_books_before)
 
     return books
 
@@ -82,17 +87,20 @@ def apply_post_filters(books: pd.DataFrame, filters: dict, filterValidation: dic
     if "names" in filters and filters["names"] is not None:
         logger.info("APPLYING names filter")
         names = filters["names"]
+        
+        len_books_before = len(books)
         name_mask = books["description"].str.contains('|'.join(names), case=False, na=False, regex=True)
         books = books[name_mask]
 
-        validate_keywords_filter(books, filters["names"], filterValidation)
+        validate_keywords_filter(books, filters["names"], filterValidation, len_books_before)
 
     # Sort by tone and return the top k
     # added an extra check to be sure before sorting
     if "tone" in filters and filters["tone"] is not None and filters["tone"] in tone_options:
+        len_books_before = len(books)
         books = books.sort_values(by=filters["tone"], ascending=False)
         
-        validate_tone_filter(books, filters["tone"], filterValidation)
+        validate_tone_filter(books, filters["tone"], filterValidation, len_books_before)
 
     logger.info("Finished applying post filters")
     return books.head(k)

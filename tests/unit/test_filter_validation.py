@@ -26,7 +26,7 @@ class TestValidateAuthorFilter:
         king_books = sample_books[sample_books['authors'].str.contains('Stephen King')]
         filterValidation = {}
         
-        validate_author_filter(king_books, ['Stephen King'], filterValidation)
+        validate_author_filter(king_books, ['Stephen King'], filterValidation, len(sample_books))
         
         assert 'applied_author' in filterValidation
         author_val = filterValidation['applied_author']
@@ -44,7 +44,7 @@ class TestValidateAuthorFilter:
         ]
         filterValidation = {}
         
-        validate_author_filter(filtered_books, ['Stephen King', 'J.K. Rowling'], filterValidation)
+        validate_author_filter(filtered_books, ['Stephen King', 'J.K. Rowling'], filterValidation, len(sample_books))
         
         author_val = filterValidation['applied_author']
         assert author_val['status'] == 'success'
@@ -56,21 +56,21 @@ class TestValidateAuthorFilter:
         filterValidation = {}
         
         # Try to validate all books against only J.K. Rowling
-        validate_author_filter(sample_books, ['J.K. Rowling'], filterValidation)
+        validate_author_filter(sample_books, ['J.K. Rowling'], filterValidation, len(sample_books))
         
         author_val = filterValidation['applied_author']
         assert author_val['applied'] == True
         assert author_val['status'] == 'failed'
         assert author_val['num_books_after'] == 11  # All 11 books in conftest with new Stephen King book
-        assert 'Failed Author Filter' in author_val['error']
-        assert 'George Orwell' in author_val['error']  # First book that fails
+        assert 'Failed Author Filter' in author_val['message']
+        assert 'George Orwell' in author_val['message']  # First book that fails
 
     def test_empty_books_validation(self):
         """Test validation with empty DataFrame"""
         empty_books = pd.DataFrame(columns=['authors', 'simple_categories', 'num_pages'])
         filterValidation = {}
         
-        validate_author_filter(empty_books, ['Stephen King'], filterValidation)
+        validate_author_filter(empty_books, ['Stephen King'], filterValidation, 0)
         
         author_val = filterValidation['applied_author']
         assert author_val['status'] == 'success'  # Empty should pass
@@ -84,7 +84,7 @@ class TestValidateGenreFilter:
         fiction_books = sample_books[sample_books['simple_categories'] == 'Fiction']
         filterValidation = {}
         
-        validate_genre_filter(fiction_books, 'Fiction', filterValidation)
+        validate_genre_filter(fiction_books, 'Fiction', filterValidation, len(sample_books))
         
         genre_val = filterValidation['applied_genre']
         assert genre_val['applied'] == True
@@ -96,19 +96,19 @@ class TestValidateGenreFilter:
         """Test validation fails when book doesn't match genre"""
         filterValidation = {}
         
-        validate_genre_filter(sample_books, 'Fiction', filterValidation)
+        validate_genre_filter(sample_books, 'Fiction', filterValidation, len(sample_books))
         
         genre_val = filterValidation['applied_genre']
         assert genre_val['status'] == 'failed'
-        assert 'Failed Genre Filter' in genre_val['error']
-        assert "Children's Fiction" in genre_val['error']
+        assert 'Failed Genre Filter' in genre_val['message']
+        assert "Children's Fiction" in genre_val['message']
 
     def test_children_genre_validation(self, sample_books):
         """Test validation with children's genre"""
         children_books = sample_books[sample_books['simple_categories'] == "Children's Fiction"]
         filterValidation = {}
         
-        validate_genre_filter(children_books, "Children's Fiction", filterValidation)
+        validate_genre_filter(children_books, "Children's Fiction", filterValidation, len(sample_books))
         
         genre_val = filterValidation['applied_genre']
         assert genre_val['status'] == 'success'
@@ -122,7 +122,7 @@ class TestValidateMinPagesFilter:
         long_books = sample_books[sample_books['num_pages'] >= 200]
         filterValidation = {}
         
-        validate_min_pages_filter(long_books, 200, filterValidation)
+        validate_min_pages_filter(long_books, 200, filterValidation, len(sample_books))
         
         min_val = filterValidation['applied_min_pages']
         assert min_val['applied'] == True
@@ -134,19 +134,19 @@ class TestValidateMinPagesFilter:
         """Test validation fails when book has too few pages"""
         filterValidation = {}
         
-        validate_min_pages_filter(sample_books, 400, filterValidation)
+        validate_min_pages_filter(sample_books, 400, filterValidation, len(sample_books))
         
         min_val = filterValidation['applied_min_pages']
         assert min_val['status'] == 'failed'
-        assert 'Failed Min Pages Filter' in min_val['error']
-        assert '200' in min_val['error']  # First book with insufficient pages (1984 - 200 pages)
+        assert 'Failed Min Pages Filter' in min_val['message']
+        assert '200' in min_val['message']  # First book with insufficient pages (1984 - 200 pages)
 
     def test_edge_case_exact_min_pages(self, sample_books):
         """Test validation with exact minimum pages"""
         exact_books = sample_books[sample_books['num_pages'] >= 300]
         filterValidation = {}
         
-        validate_min_pages_filter(exact_books, 300, filterValidation)
+        validate_min_pages_filter(exact_books, 300, filterValidation, len(sample_books))
         
         min_val = filterValidation['applied_min_pages']
         assert min_val['status'] == 'success'
@@ -159,7 +159,7 @@ class TestValidateMaxPagesFilter:
         short_books = sample_books[sample_books['num_pages'] <= 300]
         filterValidation = {}
         
-        validate_max_pages_filter(short_books, 300, filterValidation)
+        validate_max_pages_filter(short_books, 300, filterValidation, len(sample_books))
         
         max_val = filterValidation['applied_max_pages']
         assert max_val['applied'] == True
@@ -171,19 +171,19 @@ class TestValidateMaxPagesFilter:
         """Test validation fails when book has too many pages"""
         filterValidation = {}
         
-        validate_max_pages_filter(sample_books, 200, filterValidation)
+        validate_max_pages_filter(sample_books, 200, filterValidation, len(sample_books))
         
         max_val = filterValidation['applied_max_pages']
         assert max_val['status'] == 'failed'
-        assert 'Failed Max Pages Filter' in max_val['error']
-        assert '300' in max_val['error']  # Should mention the failing page count
+        assert 'Failed Max Pages Filter' in max_val['message']
+        assert '300' in max_val['message']  # Should mention the failing page count
 
     def test_edge_case_exact_max_pages(self, sample_books):
         """Test validation with exact maximum pages"""
         exact_books = sample_books[sample_books['num_pages'] <= 1138]  # Updated to match largest book in conftest
         filterValidation = {}
         
-        validate_max_pages_filter(exact_books, 1138, filterValidation)
+        validate_max_pages_filter(exact_books, 1138, filterValidation, len(sample_books))
         
         max_val = filterValidation['applied_max_pages']
         assert max_val['status'] == 'success'
@@ -201,9 +201,9 @@ class TestFilterValidationIntegration:
         filterValidation = {}
         
         # Run all validations
-        validate_author_filter(author_filtered, ['Stephen King'], filterValidation)
-        validate_genre_filter(genre_filtered, 'Fiction', filterValidation)
-        validate_min_pages_filter(page_filtered, 300, filterValidation)
+        validate_author_filter(author_filtered, ['Stephen King'], filterValidation, len(sample_books))
+        validate_genre_filter(genre_filtered, 'Fiction', filterValidation, len(author_filtered))
+        validate_min_pages_filter(page_filtered, 300, filterValidation, len(genre_filtered))
         
         # Check all validations passed
         assert filterValidation['applied_author']['status'] == 'success'
@@ -217,12 +217,12 @@ class TestFilterValidationIntegration:
         """Test that validation stops when first invalid book is found"""
         filterValidation = {}
         
-        validate_author_filter(sample_books, ['Nonexistent Author'], filterValidation)
+        validate_author_filter(sample_books, ['Nonexistent Author'], filterValidation, len(sample_books))
         
         author_val = filterValidation['applied_author']
         assert author_val['status'] == 'failed'
         # Should fail on first book (George Orwell - first in conftest)
-        assert 'George Orwell' in author_val['error']
+        assert 'George Orwell' in author_val['message']
 
 class TestValidateKeywordsFilter:
     """Test cases for validate_keywords_filter function"""
@@ -233,7 +233,7 @@ class TestValidateKeywordsFilter:
         novel_books = sample_books[sample_books['description'].str.contains('novel', case=False, na=False)]
         filterValidation = {}
         
-        validate_keywords_filter(novel_books, ['novel'], filterValidation)
+        validate_keywords_filter(novel_books, ['novel'], filterValidation, len(sample_books))
         
         assert 'applied_keywords' in filterValidation
         keywords_val = filterValidation['applied_keywords']
@@ -250,7 +250,7 @@ class TestValidateKeywordsFilter:
         ]
         filterValidation = {}
         
-        validate_keywords_filter(keyword_books, ['wizard', 'horror'], filterValidation)
+        validate_keywords_filter(keyword_books, ['wizard', 'horror'], filterValidation, len(sample_books))
         
         keywords_val = filterValidation['applied_keywords']
         assert keywords_val['status'] == 'success'
@@ -261,18 +261,18 @@ class TestValidateKeywordsFilter:
         filterValidation = {}
         
         # Try to validate all books against a keyword that doesn't exist
-        validate_keywords_filter(sample_books, ['nonexistent'], filterValidation)
+        validate_keywords_filter(sample_books, ['nonexistent'], filterValidation, len(sample_books))
         
         keywords_val = filterValidation['applied_keywords']
         assert keywords_val['applied'] == True
         assert keywords_val['status'] == 'failed'
-        assert 'Failed Keywords Filter' in keywords_val['error']
+        assert 'Failed Keywords Filter' in keywords_val['message']
 
     def test_empty_keywords_validation(self, sample_books):
         """Test validation with empty keywords list"""
         filterValidation = {}
         
-        validate_keywords_filter(sample_books, [], filterValidation)
+        validate_keywords_filter(sample_books, [], filterValidation, len(sample_books))
         
         keywords_val = filterValidation['applied_keywords']
         assert keywords_val['status'] == 'success'  # Empty keywords should pass
@@ -283,7 +283,7 @@ class TestValidateKeywordsFilter:
         empty_books = pd.DataFrame(columns=['description'])
         filterValidation = {}
         
-        validate_keywords_filter(empty_books, ['any'], filterValidation)
+        validate_keywords_filter(empty_books, ['any'], filterValidation, 0)
         
         keywords_val = filterValidation['applied_keywords']
         assert keywords_val['status'] == 'success'  # Empty DataFrame should pass
@@ -296,7 +296,7 @@ class TestValidateToneFilter:
         """Test validation passes for tone filter"""
         filterValidation = {}
         
-        validate_tone_filter(sample_books, 'joy', filterValidation)
+        validate_tone_filter(sample_books, 'joy', filterValidation, len(sample_books))
         
         assert 'applied_tone' in filterValidation
         tone_val = filterValidation['applied_tone']
@@ -312,7 +312,7 @@ class TestValidateToneFilter:
         
         for tone in tone_options:
             filterValidation = {}
-            validate_tone_filter(sample_books, tone, filterValidation)
+            validate_tone_filter(sample_books, tone, filterValidation, len(sample_books))
             
             tone_val = filterValidation['applied_tone']
             assert tone_val['status'] == 'success'
@@ -324,7 +324,7 @@ class TestValidateToneFilter:
         empty_books = pd.DataFrame()
         filterValidation = {}
         
-        validate_tone_filter(empty_books, 'joy', filterValidation)
+        validate_tone_filter(empty_books, 'joy', filterValidation, 0)
         
         tone_val = filterValidation['applied_tone']
         assert tone_val['status'] == 'success'  # Tone validation always passes
@@ -336,7 +336,7 @@ class TestValidateToneFilter:
         filterValidation = {}
         
         # Tone validation should always pass since it just confirms sorting was applied
-        validate_tone_filter(sample_books, 'invalid_tone', filterValidation)
+        validate_tone_filter(sample_books, 'invalid_tone', filterValidation, len(sample_books))
         
         tone_val = filterValidation['applied_tone']
         assert tone_val['status'] == 'success'
@@ -353,7 +353,7 @@ class TestValidatePublishedYearFilter:
         filterValidation = {}
         published_year = {"min": None, "max": None, "exact": 1997}
 
-        validate_published_year_filter(books_1997, published_year, filterValidation)
+        validate_published_year_filter(books_1997, published_year, filterValidation, len(sample_books))
 
         assert 'applied_published_year' in filterValidation
         year_val = filterValidation['applied_published_year']
@@ -368,12 +368,12 @@ class TestValidatePublishedYearFilter:
         filterValidation = {}
         published_year = {"min": None, "max": None, "exact": 1999}
 
-        validate_published_year_filter(sample_books, published_year, filterValidation)
+        validate_published_year_filter(sample_books, published_year, filterValidation, len(sample_books))
 
         year_val = filterValidation['applied_published_year']
         assert year_val['status'] == 'failed'
         assert year_val['filter_value']['exact'] == 1999
-        assert 'error' in year_val
+        assert 'message' in year_val
 
     def test_min_year_validation_success(self, sample_books):
         """Test validation passes when all books are published after min year"""
@@ -382,7 +382,7 @@ class TestValidatePublishedYearFilter:
         filterValidation = {}
         published_year = {"min": 2000, "max": None, "exact": None}
 
-        validate_published_year_filter(books_2000_plus, published_year, filterValidation)
+        validate_published_year_filter(books_2000_plus, published_year, filterValidation, len(sample_books))
         
         year_val = filterValidation['applied_published_year']
         assert year_val['status'] == 'success'
@@ -393,12 +393,12 @@ class TestValidatePublishedYearFilter:
         filterValidation = {}
         published_year = {"min": 2010, "max": None, "exact": None}
 
-        validate_published_year_filter(sample_books, published_year, filterValidation)
+        validate_published_year_filter(sample_books, published_year, filterValidation, len(sample_books))
 
         year_val = filterValidation['applied_published_year']
         assert year_val['status'] == 'failed'
         assert year_val['filter_value']['min'] == 2010
-        assert 'error' in year_val
+        assert 'message' in year_val
 
     def test_max_year_validation_success(self, sample_books):
         """Test validation passes when all books are published before max year"""
@@ -407,7 +407,7 @@ class TestValidatePublishedYearFilter:
         filterValidation = {}
         published_year = {"min": None, "max": 2005, "exact": None}
 
-        validate_published_year_filter(books_2005_minus, published_year, filterValidation)
+        validate_published_year_filter(books_2005_minus, published_year, filterValidation, len(sample_books))
         
         year_val = filterValidation['applied_published_year']
         assert year_val['status'] == 'success'
@@ -418,12 +418,12 @@ class TestValidatePublishedYearFilter:
         filterValidation = {}
         published_year = {"min": None, "max": 1990, "exact": None}
 
-        validate_published_year_filter(sample_books, published_year, filterValidation)
+        validate_published_year_filter(sample_books, published_year, filterValidation, len(sample_books))
 
         year_val = filterValidation['applied_published_year']
         assert year_val['status'] == 'failed'
         assert year_val['filter_value']['max'] == 1990
-        assert 'error' in year_val
+        assert 'message' in year_val
 
     def test_year_range_validation_success(self, sample_books):
         """Test validation passes when all books are within year range"""
@@ -439,7 +439,8 @@ class TestValidatePublishedYearFilter:
         validate_published_year_filter(
             books_range, 
             published_year, 
-            filterValidation
+            filterValidation,
+            len(sample_books)
         )
         
         year_val = filterValidation['applied_published_year']
@@ -453,7 +454,7 @@ class TestValidatePublishedYearFilter:
         filterValidation = {}
         published_year = {"min": None, "max": None, "exact": 2000}
 
-        validate_published_year_filter(empty_books, published_year, filterValidation)
+        validate_published_year_filter(empty_books, published_year, filterValidation, 0)
 
         year_val = filterValidation['applied_published_year']
         assert year_val['status'] == 'success'  # No books to fail validation
@@ -471,7 +472,8 @@ class TestValidatePublishedYearFilter:
         validate_published_year_filter(
             books_1997,
             published_year,
-            filterValidation
+            filterValidation,
+            len(sample_books)
         )
         
         year_val = filterValidation['applied_published_year']

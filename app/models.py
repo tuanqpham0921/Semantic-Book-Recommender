@@ -54,6 +54,7 @@ class BookRecommendation(BaseModel):
 # log the filtering
 class ValidationLog(BaseModel):
     applied: bool
+    num_books_before: int
     num_books_after: int
     filter_value: Optional[Union[str, List[str], int, dict]] = None
     status: str # "success", "failed", "skipped"
