@@ -24,7 +24,8 @@ def add_cors_middleware(app):
         CORSMiddleware,
         allow_origins=[
             "https://tuanqpham0921.com",
-            "https://www.tuanqpham0921.com"
+            "https://www.tuanqpham0921.com",
+            "*"
         ],
         allow_credentials=True,
         allow_methods=["*"],
