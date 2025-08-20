@@ -13,7 +13,8 @@ from app.filter_validation import (
     validate_min_pages_filter,
     validate_max_pages_filter,
     validate_keywords_filter,
-    validate_tone_filter
+    validate_tone_filter,
+    validate_published_year_filter
 )
 
 class TestValidateAuthorFilter:
@@ -340,3 +341,139 @@ class TestValidateToneFilter:
         tone_val = filterValidation['applied_tone']
         assert tone_val['status'] == 'success'
         assert tone_val['filter_value'] == 'invalid_tone'
+
+
+class TestValidatePublishedYearFilter:
+    """Test cases for validate_published_year_filter function"""
+
+    def test_exact_year_validation_success(self, sample_books):
+        """Test validation passes when all books match exact published year"""
+        # Filter to books published in 1997 (Harry Potter and the Philosopher's Stone)
+        books_1997 = sample_books[sample_books['published_year'] == 1997]
+        filterValidation = {}
+        published_year = {"min": None, "max": None, "exact": 1997}
+
+        validate_published_year_filter(books_1997, published_year, filterValidation)
+
+        assert 'applied_published_year' in filterValidation
+        year_val = filterValidation['applied_published_year']
+        assert year_val['applied'] == True
+        assert year_val['status'] == 'success'
+        assert year_val['filter_value']['exact'] == 1997
+        assert 'error' not in year_val
+
+    def test_exact_year_validation_failure(self, sample_books):
+        """Test validation fails when books don't match exact published year"""
+        # Use books from different years but expect 1999
+        filterValidation = {}
+        published_year = {"min": None, "max": None, "exact": 1999}
+
+        validate_published_year_filter(sample_books, published_year, filterValidation)
+
+        year_val = filterValidation['applied_published_year']
+        assert year_val['status'] == 'failed'
+        assert year_val['filter_value']['exact'] == 1999
+        assert 'error' in year_val
+
+    def test_min_year_validation_success(self, sample_books):
+        """Test validation passes when all books are published after min year"""
+        # Filter to books published in 2000 or later
+        books_2000_plus = sample_books[sample_books['published_year'] >= 2000]
+        filterValidation = {}
+        published_year = {"min": 2000, "max": None, "exact": None}
+
+        validate_published_year_filter(books_2000_plus, published_year, filterValidation)
+        
+        year_val = filterValidation['applied_published_year']
+        assert year_val['status'] == 'success'
+        assert year_val['filter_value']['min'] == 2000
+
+    def test_min_year_validation_failure(self, sample_books):
+        """Test validation fails when some books are published before min year"""
+        filterValidation = {}
+        published_year = {"min": 2010, "max": None, "exact": None}
+
+        validate_published_year_filter(sample_books, published_year, filterValidation)
+
+        year_val = filterValidation['applied_published_year']
+        assert year_val['status'] == 'failed'
+        assert year_val['filter_value']['min'] == 2010
+        assert 'error' in year_val
+
+    def test_max_year_validation_success(self, sample_books):
+        """Test validation passes when all books are published before max year"""
+        # Filter to books published in 2005 or earlier
+        books_2005_minus = sample_books[sample_books['published_year'] <= 2005]
+        filterValidation = {}
+        published_year = {"min": None, "max": 2005, "exact": None}
+
+        validate_published_year_filter(books_2005_minus, published_year, filterValidation)
+        
+        year_val = filterValidation['applied_published_year']
+        assert year_val['status'] == 'success'
+        assert year_val['filter_value']['max'] == 2005
+
+    def test_max_year_validation_failure(self, sample_books):
+        """Test validation fails when some books are published after max year"""
+        filterValidation = {}
+        published_year = {"min": None, "max": 1990, "exact": None}
+
+        validate_published_year_filter(sample_books, published_year, filterValidation)
+
+        year_val = filterValidation['applied_published_year']
+        assert year_val['status'] == 'failed'
+        assert year_val['filter_value']['max'] == 1990
+        assert 'error' in year_val
+
+    def test_year_range_validation_success(self, sample_books):
+        """Test validation passes when all books are within year range"""
+        # Filter to books published between 1990 and 2010
+        books_range = sample_books[
+            (sample_books['published_year'] >= 1990) & 
+            (sample_books['published_year'] <= 2010)
+        ]
+        filterValidation = {}
+        published_year = {"min": 1990, "max": 2010, "exact": None}
+
+        
+        validate_published_year_filter(
+            books_range, 
+            published_year, 
+            filterValidation
+        )
+        
+        year_val = filterValidation['applied_published_year']
+        assert year_val['status'] == 'success'
+        assert year_val['filter_value']['min'] == 1990
+        assert year_val['filter_value']['max'] == 2010
+
+    def test_empty_books_validation(self):
+        """Test validation with empty DataFrame"""
+        empty_books = pd.DataFrame()
+        filterValidation = {}
+        published_year = {"min": None, "max": None, "exact": 2000}
+
+        validate_published_year_filter(empty_books, published_year, filterValidation)
+
+        year_val = filterValidation['applied_published_year']
+        assert year_val['status'] == 'success'  # No books to fail validation
+        assert year_val['num_books_after'] == 0
+        assert year_val['filter_value']['exact'] == 2000
+
+    def test_exact_takes_priority_over_range(self, sample_books):
+        """Test that exact year takes priority over min/max when provided"""
+        # Filter to books published in 1997
+        books_1997 = sample_books[sample_books['published_year'] == 1997]
+        filterValidation = {}
+        published_year = {"min": 2000, "max": 2010, "exact": 1997}
+        
+        # Even with conflicting min/max, exact should take priority
+        validate_published_year_filter(
+            books_1997,
+            published_year,
+            filterValidation
+        )
+        
+        year_val = filterValidation['applied_published_year']
+        assert year_val['status'] == 'success'
+        assert year_val['filter_value']['exact'] == 1997

@@ -12,7 +12,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from app.filter_query import (
     extract_tone, extract_pages, extract_genre, 
     extract_children, extract_names, extract_authors,
-    assemble_filters, extract_query_filters, standardized_genre
+    assemble_filters, extract_query_filters, standardized_genre,
+    extract_published_year
 )
 
 class TestFilterQueryMocked:
@@ -108,7 +109,7 @@ class TestFilterQueryMocked:
         
         result = extract_genre("I want fiction books")
         
-        assert result == "fiction"
+        assert result == "Fiction"
 
     @patch('app.filter_query.client')
     def test_extract_genre_non_fiction(self, mock_client):
@@ -119,7 +120,7 @@ class TestFilterQueryMocked:
         
         result = extract_genre("I want non-fiction books")
         
-        assert result == "non-fiction"
+        assert result == "Nonfiction"
 
     def test_assemble_filters_handles_empty_extractions(self):
         """Test that assemble_filters handles empty/null extractions correctly"""
@@ -302,3 +303,58 @@ class TestStandardizedGenre:
         # These SHOULD match because they have proper word boundaries
         assert standardized_genre("fiction-based") == "Fiction"  # Word boundary at start
         assert standardized_genre("pure fiction") == "Fiction"  # Word boundary at end
+
+
+class TestPublishedYearExtraction:
+    """Unit tests for extract_published_year function."""
+
+    @patch('app.filter_query.client')
+    def test_published_year_min(self, mock_client):
+        """Test extraction of minimum published year."""
+        mock_response = MagicMock()
+        mock_response.choices[0].message.content = '{"published_year_min": 1990, "published_year_max": null, "published_year_exact": null}'
+        mock_client.chat.completions.create.return_value = mock_response
+        
+        result = extract_published_year("Books published after 1990")
+        assert result == {"min": 1990, "max": None, "exact": None}
+
+    @patch('app.filter_query.client')
+    def test_published_year_max(self, mock_client):
+        """Test extraction of maximum published year."""
+        mock_response = MagicMock()
+        mock_response.choices[0].message.content = '{"published_year_min": null, "published_year_max": 2000, "published_year_exact": null}'
+        mock_client.chat.completions.create.return_value = mock_response
+        
+        result = extract_published_year("Books published before 2000")
+        assert result == {"min": None, "max": 2000, "exact": None}
+
+    @patch('app.filter_query.client')
+    def test_published_year_exact(self, mock_client):
+        """Test extraction of exact published year."""
+        mock_response = MagicMock()
+        mock_response.choices[0].message.content = '{"published_year_min": null, "published_year_max": null, "published_year_exact": 2015}'
+        mock_client.chat.completions.create.return_value = mock_response
+        
+        result = extract_published_year("Books published in 2015")
+        assert result == {"min": None, "max": None, "exact": 2015}
+
+    @patch('app.filter_query.client')
+    def test_published_year_range(self, mock_client):
+        """Test extraction of published year range."""
+        mock_response = MagicMock()
+        mock_response.choices[0].message.content = '{"published_year_min": 1980, "published_year_max": 1990, "published_year_exact": null}'
+        mock_client.chat.completions.create.return_value = mock_response
+        
+        result = extract_published_year("Books published from 1980 to 1990")
+        assert result == {"min": 1980, "max": 1990, "exact": None}
+
+    @patch('app.filter_query.client')
+    def test_no_published_year(self, mock_client):
+        """Test when no published year is mentioned."""
+        mock_response = MagicMock()
+        mock_response.choices[0].message.content = '{"published_year_min": null, "published_year_max": null, "published_year_exact": null}'
+        mock_client.chat.completions.create.return_value = mock_response
+        
+        result = extract_published_year("Books about adventure")
+
+        assert result == {"min": None, "max": None, "exact": None}

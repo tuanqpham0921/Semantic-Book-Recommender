@@ -680,5 +680,75 @@
             ]
          }
       }
+   },
+   {
+      "id": 60,
+      "query": "A novel published in 1984",
+      "description": "published_year_exact (published in)",
+      "expected": {
+         "content": "a novel",
+         "filters": {
+            "published_year_exact": 1984
+         }
+      }
+   },
+   {
+      "id": 61,
+      "query": "Books written in 2020 about technology",
+      "description": "published_year_exact (written in)",
+      "expected": {
+         "content": "books about technology",
+         "filters": {
+            "published_year_exact": 2020
+         }
+      }
+   },
+   {
+      "id": 62,
+      "query": "A mystery novel published after 2010",
+      "description": "published_year_min (published after)",
+      "expected": {
+         "content": "a mystery novel",
+         "filters": {
+            "published_year_min": 2010
+         }
+      }
+   },
+   {
+      "id": 63,
+      "query": "Classic literature written before 1950",
+      "description": "published_year_max (written before)",
+      "expected": {
+         "content": "classic literature",
+         "filters": {
+            "published_year_max": 1950
+         }
+      }
+   },
+   {
+      "id": 64,
+      "query": "A contemporary fiction book published from 2000 to 2020",
+      "description": "published_year_min and published_year_max (range)",
+      "expected": {
+         "content": "a contemporary fiction book",
+         "filters": {
+            "genre": "fiction",
+            "published_year_min": 2000,
+            "published_year_max": 2020
+         }
+      }
+   },
+   {
+      "id": 65,
+      "query": "A historical non-fiction book written after 1990 with at least 300 pages",
+      "description": "published_year_min + genre + pages_min",
+      "expected": {
+         "content": "a historical book",
+         "filters": {
+            "genre": "non-fiction",
+            "published_year_min": 1990,
+            "pages_min": 300
+         }
+      }
    }
 ]
