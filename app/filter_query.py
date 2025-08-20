@@ -15,6 +15,8 @@ client = OpenAI()
 MODEL = "gpt-4o-mini-2024-07-18"
 
 filter_categories = ["tone", "pages_max", "pages_min", "genre", "children", "names"]
+# Add published_year_exact to filter categories
+filter_categories += ["published_year_min", "published_year_max", "published_year_exact"]
 
 def _so(query: str, system: str, schema: dict, extra: dict | None = None) -> dict:
     """Single-call Structured Output helper (Chat Completions API)."""
@@ -81,6 +83,38 @@ _PAGES_SYS = (
 def extract_pages(query: str) -> Dict[str, Optional[int]]:
     out = _so(query, _PAGES_SYS, _PAGES_SCHEMA)
     return {"pages_min": out["pages_min"], "pages_max": out["pages_max"]}
+
+# -----------------------
+# Published Year (min/max)
+# -----------------------
+# Published Year (min/max/exact)
+_YEAR_SCHEMA = {
+    "name": "PublishedYearExtraction",
+    "strict": True,
+    "schema": {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "published_year_min": {"type": ["integer", "null"], "minimum": 0},
+            "published_year_max": {"type": ["integer", "null"], "minimum": 0},
+            "published_year_exact": {"type": ["integer", "null"], "minimum": 0},
+        },
+        "required": ["published_year_min", "published_year_max", "published_year_exact"]
+    }
+}
+_YEAR_SYS = (
+    "Return JSON for the schema. Extract numeric published year bounds if explicitly stated:\n"
+    "- published_year_min for phrases like 'published after N', 'written after N', 'from N', 'N or later', 'since N'.\n"
+    "- published_year_max for phrases like 'published before N', 'written before N', 'up to N', 'until N', 'no later than N'.\n"
+    "- published_year_exact for phrases like 'published in N', 'written in N', 'N edition', 'N year', 'exactly N'.\n"
+)
+def extract_published_year(query: str) -> Dict[str, Optional[int]]:
+    out = _so(query, _YEAR_SYS, _YEAR_SCHEMA)
+    return {
+        "min": out["published_year_min"],
+        "max": out["published_year_max"],
+        "exact": out["published_year_exact"]
+    }
 
 # -----------------------
 # 3) Genre (literal only)
@@ -254,6 +288,8 @@ def assemble_filters(query: str) -> Dict[str, Any]:
     names = extract_names(query)
     author = extract_authors(query)
 
+    years = extract_published_year(query)
+
     filters: Dict[str, Any] = {}
     if tone: filters["tone"] = tone
     if pages.get("pages_min") is not None: filters["pages_min"] = pages["pages_min"]
@@ -262,6 +298,11 @@ def assemble_filters(query: str) -> Dict[str, Any]:
     if child: filters["children"] = True
     if names: filters["names"] = names
     if author: filters["author"] = author
+
+    # Only add published_year if at least one value is not None
+    if any(value is not None for value in years.values()):
+        filters["published_year"] = years
+
     return filters
 
 def extract_query_filters(query: str, drop_names_from_content: bool = False) -> dict:
@@ -277,22 +318,22 @@ def extract_query_filters(query: str, drop_names_from_content: bool = False) -> 
 
 if __name__ == "__main__":
     # quick smoke tests
-    q1 = "Books written by George Orwell and Aldous Huxley"
-    q1_res = json.dumps(extract_query_filters(q1, drop_names_from_content=False), indent=2, ensure_ascii=False)
+    q1 = "a book written before 2019"
+    q1_res = json.dumps(extract_published_year(q1), indent=2, ensure_ascii=False)
     print(q1_res)
     print("------------------------------------------------")
 
-    # load in the 50 tests
-    with open("data_processing/etc/description_test_50.json", "r") as f:
-        tests = json.load(f)
+    # # load in the 50 tests
+    # with open("data_processing/etc/description_test_50.json", "r") as f:
+    #     tests = json.load(f)
 
-    # run and print the results
-    with open("result_50.txt", "w") as f:
-        for i, test in enumerate(tests):
-            query = test["query"]
-            res = extract_query_filters(query)
-            print(f"Test {i + 1}:")
-            print(json.dumps(res, indent=2, ensure_ascii=False))
-            f.write(json.dumps(res, indent=2, ensure_ascii=False))
-            print("------------------------------------------------")
+    # # run and print the results
+    # with open("result_50.txt", "w") as f:
+    #     for i, test in enumerate(tests):
+    #         query = test["query"]
+    #         res = extract_query_filters(query)
+    #         print(f"Test {i + 1}:")
+    #         print(json.dumps(res, indent=2, ensure_ascii=False))
+    #         f.write(json.dumps(res, indent=2, ensure_ascii=False))
+    #         print("------------------------------------------------")
             

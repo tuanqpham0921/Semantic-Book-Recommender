@@ -4,7 +4,8 @@ import logging
 from app.filter_validation import (
     validate_author_filter, validate_genre_filter,
     validate_min_pages_filter, validate_max_pages_filter,
-    validate_keywords_filter, validate_tone_filter
+    validate_keywords_filter, validate_tone_filter,
+    validate_published_year_filter
 )
 
 # Get the logger (same configuration as main.py)
@@ -54,6 +55,22 @@ def apply_pre_filters(books: pd.DataFrame, filters: dict, filterValidation: dict
         logger.info(f"Has {len(books)} books after pages_max: {filters['pages_max']} filter.")
 
         validate_max_pages_filter(books, filters["pages_max"], filterValidation)
+
+    if "published_year" in filters and filters["published_year"] is not None:
+        logger.info("APPLYING published_year filter")
+        published_year = filters["published_year"]
+
+        # Check for exact year first (takes priority)
+        if published_year.get("exact") is not None:
+            books = books[books["published_year"] == published_year["exact"]]
+        
+        # Apply min/max filters if exact is not specified
+        if published_year.get("min") is not None:
+            books = books[books["published_year"] >= published_year["min"]]
+        if published_year.get("max") is not None:
+            books = books[books["published_year"] <= published_year["max"]]
+
+        validate_published_year_filter(books, published_year, filterValidation)
 
     return books
 
