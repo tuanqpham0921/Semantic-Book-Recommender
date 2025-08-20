@@ -1,5 +1,4 @@
 import os
-import json
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
