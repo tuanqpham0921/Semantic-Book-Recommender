@@ -52,11 +52,23 @@ def reason_query_endpoint(request: QueryRequest):
     return {"content": content, "filters": filters}
 
 
-# @app.post("/explain_overall_recommendation", response_model=OverallExplanationResponse)
-# def explain_overall_recommendation(request: BookRecommendationResponse):
-#     explanation = generate_reason.explain_overall_recommendation(request)
+@app.post("/explain_overall_recommendation", response_model=OverallExplanationResponse)
+def explain_overall_recommendation(request: BookRecommendationResponse):
+    print("in the EXPLAIN END POINT")
+    
+    messages = generate_reason.get_response_messages(request)
 
-#     return {"explain_overall_recommendation": explanation}
+    # priortize no books found first
+    if len(request.recommendations) == 0:
+        explanation = generate_reason.explain_no_books_found(messages)
+    
+    # there are books 
+    elif len(messages) == 0:
+        explanation = generate_reason.explain_no_filter_applied(request.content)
+    else:
+        explanation = generate_reason.explain_overall_recommendation(messages)
+
+    return {"explain_overall_recommendation": explanation}
 
 # Endpoint to recommend books based on user query
 @app.post("/recommend_books", response_model=BookRecommendationResponse)
