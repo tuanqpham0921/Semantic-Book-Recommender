@@ -1,7 +1,5 @@
 
 import json
-import sys
-import os
 from app.config import client, MODEL
 from better_profanity import profanity
 
