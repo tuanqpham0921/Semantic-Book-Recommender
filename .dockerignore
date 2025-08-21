@@ -30,3 +30,5 @@ __pycache__/
 # data_processing
 data_processing/
 archive/
+
+*.sqlite3
