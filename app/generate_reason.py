@@ -19,7 +19,7 @@ def _so_overall(query: str, system: str, schema: dict, extra: dict | None = None
         ],
         response_format={"type": "json_schema", "json_schema": schema},
         temperature=0.7,  # Increased for more creative, conversational responses
-        max_tokens=250,   # Limit response length for concise explanations
+        max_tokens=190,   # Limit response length for concise explanations
         top_p=0.9,        # Nucleus sampling for better quality
         frequency_penalty=0.1,  # Slight penalty to avoid repetition
         presence_penalty=0.1,   # Encourage varied vocabulary
@@ -77,6 +77,8 @@ _EXPLAIN_OVERALL_SYS = (
     "AVOID:\n"
     "- Technical jargon or database terms\n"
     "- Dry, robotic language\n"
+    "- Too many large numbers\n"
+    "- Repeated numbers\n"
     "- Negative framing ('only X books left')\n"
     "- Overly long explanations\n\n"
     
