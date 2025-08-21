@@ -4,6 +4,7 @@ from app.models import (
 )
 from app.config import client, MODEL
 
+_MAX_CHAR = 250
 
 def _so_overall(query: str, system: str, schema: dict, extra: dict | None = None) -> dict:
     """Single-call Structured Output helper (Chat Completions API)."""
@@ -19,7 +20,7 @@ def _so_overall(query: str, system: str, schema: dict, extra: dict | None = None
         ],
         response_format={"type": "json_schema", "json_schema": schema},
         temperature=0.7,  # Increased for more creative, conversational responses
-        max_tokens=150,   # Limit response length for concise explanations
+        max_tokens=75,    # Limit response length for concise explanations (1-2 sentences)
         top_p=0.9,        # Nucleus sampling for better quality
         frequency_penalty=0.1,  # Slight penalty to avoid repetition
         presence_penalty=0.1,   # Encourage varied vocabulary
@@ -93,7 +94,7 @@ def explain_overall_recommendation(messages_logs: dict) -> str:
         print(f"Error generating explanation: {e}")
         message = "Sorry, I had trouble summarizing the filter process."
 
-    return message
+    return message[:_MAX_CHAR]
 
 
 # -----------------------
@@ -139,7 +140,7 @@ def explain_no_books_found(messages_logs: dict) -> str:
         print(f"Error generating explanation: {e}")
         message = "Sorry, I had trouble summarizing the filter process."
 
-    return message
+    return message[:_MAX_CHAR]
 
 
 # -----------------------
@@ -183,4 +184,4 @@ def explain_no_filter_applied(user_query: str) -> str:
         print(f"Error generating introduction: {e}")
         message = "Here are some wonderful books I found for you!"
 
-    return message
+    return message[:_MAX_CHAR]
