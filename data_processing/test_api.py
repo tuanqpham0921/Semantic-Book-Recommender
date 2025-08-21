@@ -298,7 +298,7 @@ def batch_test():
 #================================================
 #================================================
 def single_test():
-    query = "A book about space exploration"
+    query = "adfasfwfwfasda"
 
     payload = {"description": query}
     

@@ -16,6 +16,7 @@ import app.filter_query as filter_query
 import app.filter_df as filter_df
 from app.search import similarity_search_filtered
 import app.generate_reason as generate_reason
+from app.query_validation import is_valid_query
 
 # Configure middleware
 app = FastAPI()
@@ -41,6 +42,13 @@ def logger_separator():
 
 @app.post("/reason_query", response_model=ReasoningResponse)
 def reason_query_endpoint(request: QueryRequest):
+    if not is_valid_query(request.description):
+        return ReasoningResponse(
+            content="Invalid query, Please try again",
+            filters={},
+            is_valid=False
+        )
+
     filters = filter_query.assemble_filters(request.description)
     # logger.info(f"FILTERS:\n {filters}")
     # logger_separator()
@@ -48,14 +56,16 @@ def reason_query_endpoint(request: QueryRequest):
     content = filter_query.extract_content(request.description, filters)
     # logger.info(f"CONTENT:\n {content}")
     # logger_separator()
-
-    return {"content": content, "filters": filters}
+    
+    return ReasoningResponse(
+            content=content, 
+            filters=filters,
+            is_valid=True
+        )
 
 
 @app.post("/explain_overall_recommendation", response_model=OverallExplanationResponse)
 def explain_overall_recommendation(request: BookRecommendationResponse):
-    print("in the EXPLAIN END POINT")
-    
     messages = generate_reason.get_response_messages(request)
 
     # priortize no books found first

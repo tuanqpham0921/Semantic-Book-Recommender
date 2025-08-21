@@ -6,3 +6,4 @@ pydantic
 pyarrow
 pandas
 openai
+better_profanity

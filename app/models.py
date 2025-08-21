@@ -17,8 +17,9 @@ class FilterSchema(BaseModel):
     published_year: Optional[dict] = Field(default=None)
 
 class ReasoningResponse(BaseModel):
-    filters: FilterSchema
     content: str
+    filters: FilterSchema
+    is_valid: bool
 
 class RecommendBooksRequest(BaseModel):
     description: str
