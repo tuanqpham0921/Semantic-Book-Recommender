@@ -1,9 +1,15 @@
 import requests
 import sys
 import json
+import textwrap
+import argparse
+import os
+from datetime import datetime
 
-recommend_books_url = "http://localhost:8000/recommend_books"
-reason_query_url    = "http://localhost:8000/reason_query"
+url = "http://localhost:8000/"
+recommend_books_url = f"{url}recommend_books"
+reason_query_url    = f"{url}reason_query"
+explain_overall_recommendation_url = f"{url}explain_overall_recommendation"
 
 headers = {"Content-Type": "application/json"}
 prompts = [
@@ -134,7 +140,7 @@ def process_query(query, payload, reasoning):
     print_validation(result["validation"])
     print()
 
-    return 
+    return result
 
 def print_difference_reasoning(actual, expected):
     # if they are the same then skip
@@ -170,40 +176,114 @@ def print_difference_reasoning(actual, expected):
     else:
         print("YES:  differences found.")
 
+# --------------------------------------------
+
+def print_explanation(result):
+    print("=" * 110)
+    print("EXPLANATION:")
+    print("=" * 110)
+    
+    if "explain_overall_recommendation" not in result:
+        print("No explanation found.")
+        print("=" * 110)
+        return
+
+    explanation_text = result["explain_overall_recommendation"]
+    
+    # Use textwrap to format the explanation nicely
+    wrapped_text = textwrap.fill(
+        explanation_text, 
+        width=100,  # Maximum line width
+        initial_indent="  ",  # Indent first line
+        subsequent_indent="  ",  # Indent continuation lines
+        break_long_words=False,  # Don't break words
+        break_on_hyphens=False   # Don't break on hyphens
+    )
+    
+    print(wrapped_text)
+    print("=" * 110)
+    print()
+
+def get_overall_explanation(recommendation_response):
+
+    overal_validaiton_payload = recommendation_response
+    response = requests.post(explain_overall_recommendation_url, json=overal_validaiton_payload, headers=headers)
+
+    result = response.json()
+
+    return result
+
+
 def batch_test():
-    # open the json file data_processing/etc/description_test_50.json
-    with open("data_processing/etc/description_test_50.json", "r") as f:
-        data = json.load(f)
+    # Create logs directory if it doesn't exist
+    os.makedirs("batch_test_logs", exist_ok=True)
+    
+    # Generate timestamp for log file
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_file = f"batch_test_logs/batch_test_{timestamp}.txt"
+    
+    # Redirect stdout to log file
+    original_stdout = sys.stdout
+    with open(log_file, 'w') as f:
+        sys.stdout = f
+        
+        # open the json file data_processing/etc/description_test_50.json
+        with open("data_processing/etc/description_test_50.json", "r") as data_file:
+            data = json.load(data_file)
 
-    for item in data:
-        payload = {"description": item["query"]}
-        print(f"ID: {item['id']}\n")
-        reasoning = get_reasoning(item["query"], payload)
-        # result = process_query(item["query"], payload, reasoning)
+        for item in data:
+            payload = {"description": item["query"]}
+            print(f"ID: {item['id']}")
+            reasoning = get_reasoning(item["query"], payload)
 
-        expected_reasoning = item["expected"]
+            expected_reasoning = item["expected"]
+            print_difference_reasoning(reasoning, expected_reasoning)
 
-        print_difference_reasoning(reasoning, expected_reasoning)
+            recomendation_response = process_query(item["query"], payload, reasoning)
+            
+            overall_explanation = get_overall_explanation(recomendation_response)
 
-        print("-" * 110)
+            print("=" * 110)
+            print(f"PROCESSING QUERY: \n{item['query']}")
+            print_explanation(overall_explanation)
+
+            print("-" * 110)
+    
+    # Restore stdout
+    sys.stdout = original_stdout
+    print(f"Batch test completed. Results saved to: {log_file}")
 
 #================================================
 #================================================
 def single_test():
-    query = "300 page or more books by Stephen King with a sad tone and take place in Maine"
+    query = "A book about space exploration"
 
     payload = {"description": query}
     
     reasoning = get_reasoning(query, payload)
     print(f"REASONING: \n{json.dumps(reasoning, indent=2)}\n")
 
-    process_query(query, payload, reasoning)
+    recomendation_response = process_query(query, payload, reasoning)
+
+    overall_explanation = get_overall_explanation(recomendation_response)
+    print_explanation(overall_explanation)
+
+
+
 #================================================
 #================================================
 
 def main():
-    single_test()
-    # batch_test()
+    parser = argparse.ArgumentParser(description='Run API tests')
+    parser.add_argument('--mode', choices=['single', 'batch'], default='single',
+                       help='Test mode: single or batch (default: single)')
+    
+    args = parser.parse_args()
+    
+    if args.mode == 'single':
+        single_test()
+    elif args.mode == 'batch':
+        batch_test()
 
 
 if __name__ == "__main__":

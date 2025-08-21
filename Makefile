@@ -1,5 +1,5 @@
 # Makefile for Book Recommender API
-.PHONY: help install test test-unit test-integration run dev clean
+.PHONY: help install test test-unit test-integration run dev clean test-api test-api-batch
 
 # Default target
 help:
@@ -8,6 +8,8 @@ help:
 	@echo "  make test         - Run all tests"
 	@echo "  make test-unit    - Run unit tests only (fast)"
 	@echo "  make test-integration - Run integration tests only (expensive)"
+	@echo "  make test-api     - Run single API test"
+	@echo "  make test-api-batch - Run batch API tests (saves to log file)"
 	@echo "  make run          - Start the API server"
 	@echo "  make dev          - Start the API server in development mode"
 	@echo "  make clean        - Clean up cache files"
@@ -27,6 +29,14 @@ test-unit:
 # Run only integration tests (expensive, real API calls)
 test-integration:
 	pytest tests/integration/ -v -m integration
+
+# Run single API test
+test-api:
+	python data_processing/test_api.py --mode single
+
+# Run batch API tests (saves to timestamped log file)
+test-api-batch:
+	python data_processing/test_api.py --mode batch
 
 # Start the API server
 run:
