@@ -1,5 +1,4 @@
 import pandas as pd
-import logging
 
 # Generic validation function that handles the common structure
 def _generic_validate_filter(books: pd.DataFrame, filter_value, filter_name: str, applied_key: str, filterValidation: dict, len_books_before: int, validation_func):

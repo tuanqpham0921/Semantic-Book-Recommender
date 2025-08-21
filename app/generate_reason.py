@@ -1,7 +1,6 @@
 import json
 from app.models import (
-    BookRecommendationResponse, FilterValidationLog, 
-    FilterSchema
+    BookRecommendationResponse
 )
 from app.config import client, MODEL
 
