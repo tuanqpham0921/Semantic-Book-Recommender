@@ -38,31 +38,73 @@ def print_result(result, query):
     print("-" * 110)
 
     for book in result:
+        # Safely get values with fallbacks
+        title = book.get('title', 'Unknown Title')
+        authors = book.get('authors', 'Unknown Author')
+        categories = book.get('simple_categories', 'Unknown Genre')
+        num_pages = book.get('num_pages', 'N/A')
+        
+        # Handle None values
+        title = 'None' if title is None else str(title)
+        authors = 'None' if authors is None else str(authors)
+        categories = 'None' if categories is None else str(categories)
+        num_pages = 'None' if num_pages is None else str(num_pages)
+        
         print(
-            f"{book['title'][:60].ljust(62)}"
-            f"{book['authors'][:30].ljust(32)}"
-            f"{str(book['simple_categories'])[:25].ljust(27)}"
-            f"{str(book['num_pages']).rjust(10)}"
+            f"{title[:60].ljust(62)}"
+            f"{authors[:30].ljust(32)}"
+            f"{categories[:25].ljust(27)}"
+            f"{num_pages.rjust(10)}"
         )
     print("=" * 110)
 
     # Print all unique authors (one-liner)
-    authors_set = set([author.strip() for book in result for author in str(book['authors']).replace(';', ',').split(',') if author.strip()])
+    authors_set = set()
+    for book in result:
+        authors = book.get('authors', '')
+        if authors and authors != 'None':
+            author_list = str(authors).replace(';', ',').split(',')
+            for author in author_list:
+                if author.strip():
+                    authors_set.add(author.strip())
+    
     print("Unique Authors: \n")
-    print("\n".join(sorted(authors_set)))
+    if authors_set:
+        print("\n".join(sorted(authors_set)))
+    else:
+        print("None")
     print("-" * 110)
 
 
     # Print all unique genres (one-liner)
-    genres_set = set([genre.strip() for book in result for genre in str(book['simple_categories']).replace(';', ',').split(',') if genre.strip()])
+    genres_set = set()
+    for book in result:
+        categories = book.get('simple_categories', '')
+        if categories and categories != 'None':
+            genre_list = str(categories).replace(';', ',').split(',')
+            for genre in genre_list:
+                if genre.strip():
+                    genres_set.add(genre.strip())
+    
     print("Unique Genres: \n")
-    print("\n".join(sorted(genres_set)))
+    if genres_set:
+        print("\n".join(sorted(genres_set)))
+    else:
+        print("None")
     print("-" * 110)
 
     # Print all unique num pages
-    num_pages_set = set([book['num_pages'] for book in result if 'num_pages' in book])
+    num_pages_set = set()
+    for book in result:
+        pages = book.get('num_pages')
+        if pages is not None and pages != 'None':
+            num_pages_set.add(pages)
+    
     print("Unique Num Pages: \n")
-    print(", ".join(sorted(map(str, num_pages_set))))
+    if num_pages_set:
+        print(", ".join(sorted(map(str, num_pages_set))))
+    else:
+        print("None")
 
     print("=" * 110)
 
