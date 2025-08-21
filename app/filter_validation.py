@@ -106,12 +106,12 @@ def validate_published_year_filter(books: pd.DataFrame, published_year: dict, fi
                 return
         else:
             # Handle min/max year range
-            if published_year_min is not None and book_year <= published_year_min:
+            if published_year_min is not None and book_year >= published_year_min:
                 yearValidation["message"] = f"Failed Min Published Year Filter: Expected year >{published_year_min}, but found {book_year}"
                 yearValidation["status"] = "failed"
                 return
             
-            if published_year_max is not None and book_year >= published_year_max:
+            if published_year_max is not None and book_year <= published_year_max:
                 yearValidation["message"] = f"Failed Max Published Year Filter: Expected year <{published_year_max}, but found {book_year}"
                 yearValidation["status"] = "failed"
                 return
