@@ -113,7 +113,8 @@ def recommend_books(request: RecommendBooksRequest):
     # logger_separator()
 
     # apply the post-filters
-    books = filter_df.apply_post_filters(books, filters, filterValidation, FINAL_K)
+    # books = filter_df.apply_post_filters(books, filters, filterValidation, FINAL_K)
+    books = filter_df.rerank_books_by_keywords_and_tone(books, filters, filterValidation, FINAL_K)
     # logger.info(f"\nPOST-FILTER BOOK LEN: {len(books)}")
     # logger_separator()
 
