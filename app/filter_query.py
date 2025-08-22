@@ -3,6 +3,7 @@ import re
 from typing import Optional, Dict, Any, List
 
 from app.config import client, MODEL
+from app.query_validation import remove_keywords_duplicates
 
 filter_categories = ["tone", "pages_max", "pages_min", "genre", "children", "names"]
 # Add published_year_exact to filter categories
@@ -194,7 +195,6 @@ def extract_names(query: str) -> List[str]:
     out = _so(query, _NAMES_SYS, _NAMES_SCHEMA)
     return out["names"]
 
-
 # -----------------------
 # 6) CONTENT: extract the core content using the composed filters
 # -----------------------
@@ -286,12 +286,15 @@ def assemble_filters(query: str) -> Dict[str, Any]:
     if pages.get("pages_max") is not None: filters["pages_max"] = pages["pages_max"]
     if genre: filters["genre"] = genre
     if child: filters["children"] = True
-    if names: filters["names"] = names
     if author: filters["author"] = author
 
     # Only add published_year if at least one value is not None
     if any(value is not None for value in years.values()):
         filters["published_year"] = years
+
+    if names: 
+        remove_keywords_duplicates(names, filters)
+        filters["names"] = names
 
     return filters
 

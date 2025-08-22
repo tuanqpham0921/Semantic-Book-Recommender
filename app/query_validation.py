@@ -1,5 +1,8 @@
 
 import json
+import re
+from typing import Optional, Dict, Any, List
+
 from app.config import client, MODEL
 from better_profanity import profanity
 
@@ -87,6 +90,58 @@ def is_valid_query(query: str) -> bool:
     except Exception as e:
         print(f"Error validating query: {e}")
         return False
+    
+
+def remove_keywords_duplicates(names: List[str], filters: Dict[str, Any]):
+    """Remove duplicate names from the filters in-place.
+
+    Matching is performed case-insensitively (normalized with strip().lower()).
+    The function mutates the provided `names` list so callers that rely on
+    in-place behavior continue to work.
+    """
+
+    if not names: return 
+
+    def _norm(s: str) -> str:
+        return s.strip().lower()
+
+    # Build a set of normalized tokens to remove based on filter instances
+    tokens_to_remove = set()
+    if filters:
+        for key, value in filters.items():
+            if not value:
+                continue
+
+            if isinstance(value, str):
+                tokens_to_remove.add(_norm(value))
+            elif isinstance(value, (int, float)):
+                tokens_to_remove.add(_norm(str(value)))
+            elif key == "published_year" and isinstance(value, dict):
+                for year_key in ("min", "max", "exact"):
+                    y = value.get(year_key)
+                    if y is not None:
+                        tokens_to_remove.add(_norm(str(y)))
+
+            elif isinstance(value, list):
+                for item in value:
+                    if isinstance(item, str):
+                        tokens_to_remove.add(_norm(item))
+
+    # Filter names in-place while preserving original order and removing duplicates
+    cleaned = []
+    seen = set()
+    for n in names:
+        # Preserve non-string items as-is (avoid accidental dropping)
+        kn = _norm(n)
+        if kn in tokens_to_remove or kn in seen:
+            continue
+
+        cleaned.append(n)
+        seen.add(kn)
+
+    names.clear()
+    names.extend(cleaned)
+
 
 if __name__ == "__main__":
     # quick smoke tests
