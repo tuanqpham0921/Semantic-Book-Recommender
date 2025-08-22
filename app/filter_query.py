@@ -270,7 +270,7 @@ _AUTHORS_SCHEMA = {
                 "items": {"type": "string", "minLength": 1}
             }
         },
-        "required": ["keywords"]
+        "required": ["names"]
     }
 }
 _AUTHORS_SYS = (
@@ -280,7 +280,7 @@ _AUTHORS_SYS = (
 )
 def extract_authors(query: str) -> List[str]:
     out = _so(query, _AUTHORS_SYS, _AUTHORS_SCHEMA)
-    return out["keywords"]
+    return out["names"]
 
 # ------------------------------
 # ----- Compose everything -----
