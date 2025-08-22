@@ -292,8 +292,9 @@ def assemble_filters(query: str) -> Dict[str, Any]:
     if any(value is not None for value in years.values()):
         filters["published_year"] = years
 
+    # clean the name and make sure that it's good
+    remove_keywords_duplicates(names, filters)
     if names: 
-        remove_keywords_duplicates(names, filters)
         filters["names"] = names
 
     return filters
