@@ -118,10 +118,26 @@ _YEAR_SCHEMA = {
     }
 }
 _YEAR_SYS = (
-    "Return JSON for the schema. Extract numeric published year bounds if explicitly stated:\n"
-    "- published_year_min for phrases like 'published after N', 'written after N', 'from N', 'N or later', 'since N'.\n"
-    "- published_year_max for phrases like 'published before N', 'written before N', 'up to N', 'until N', 'no later than N'.\n"
-    "- published_year_exact for phrases like 'published in N', 'written in N', 'N edition', 'N year', 'exactly N'.\n"
+    "Return JSON for the schema. Extract numeric published year constraints if explicitly stated:\n"
+    "- published_year_min for phrases like 'published after N', 'written after N', 'published from N', 'N or later', 'since N' (INCLUSIVE of N)\n"
+    "- published_year_max for phrases like 'published before N', 'written before N', 'published up to N', 'published until N', 'no later than N' (INCLUSIVE of N)\n"
+    "- published_year_exact for phrases like 'published in N', 'written in N', 'N edition', 'from N' (when referring to specific year)\n"
+    "IMPORTANT: Only extract year constraints that explicitly mention publishing/writing context.\n"
+    "IGNORE famous book titles with numbers like:\n"
+    "- '1984' (George Orwell novel title, not publication year)\n"
+    "- '2001' (A Space Odyssey title, not publication year)\n"
+    "- 'Fahrenheit 451', 'Catch-22', 'Slaughterhouse-Five', etc.\n"
+    "- Any number that appears to be part of a book title rather than publication context\n"
+    "Examples:\n"
+    "- 'books published in 2020' → published_year_exact: 2020\n"
+    "- '1984 by George Orwell' → all null (book title, not publication year)\n"
+    "- 'published after 2000' → published_year_min: 2001 (exclusive becomes inclusive)\n"
+    "- 'written from 1990' → published_year_min: 1990\n"
+    "- 'published before 2010' → published_year_max: 2009 (exclusive becomes inclusive)\n"
+    "- 'published up to 2015' → published_year_max: 2015\n"
+    "- '2001: A Space Odyssey' → all null (book title, not publication year)\n"
+    "- 'up to 2010' (without publication context) → published_year_max: 2010\n"
+    "Handle exclusive vs inclusive language carefully. If not stated, set to null."
 )
 def extract_published_year(query: str) -> Dict[str, Optional[int]]:
     out = _so(query, _YEAR_SYS, _YEAR_SCHEMA)
@@ -244,6 +260,7 @@ _KEYWORDS_SYS = (
     "- Generic book terms: book, books, novel, novels, story, stories, fiction, nonfiction, literature, reading\n"
     "- Page constraints: pages, page, under, over, at least, no more than, any number + pages\n"
     "- Publication years: 1990, 2010, 2000 (when used for 'published in/after/before')\n"
+    "- Famous book title numbers: '1984', '2001', '451', '22', '39', '5', '7' (from titles like '1984', '2001: A Space Odyssey', 'Fahrenheit 451', 'Catch-22', etc.)\n"
     "- Tone/emotion: happy, sad, scary, fear, joy, anger, neutral, horror, uplifting, depressing\n"
     "- Genre categories: mystery, romance, thriller, fantasy, science fiction, horror (these are handled separately)\n"
     "- Generic verbs: is, are, was, were, have, has, had, do, does, did, can, could, would\n"
