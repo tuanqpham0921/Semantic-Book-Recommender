@@ -126,15 +126,21 @@ _GENRE_SCHEMA = {
     "schema": {
         "type": "object",
         "additionalProperties": False,
-        "properties": {"genre": {"type": ["string", "null"], "enum": ["fiction", "non-fiction", None]}},
+        "properties": {"genre": {"type": ["string", "null"], "enum": ["Fiction", "Nonfiction", None]}},
         "required": ["genre"]
     }
 }
 _GENRE_SYS = (
-    "Return JSON for the schema. Set genre ONLY if the query literally contains "
-    "the word 'fiction' OR a non-fiction variant ('non-fiction', 'nonfiction', 'non fiction', any case). "
-    "Normalize any non-fiction variant to 'non-fiction'. If not present, genre=null. Do not infer from 'sci-fi' etc."
-    "Out put can only be 'Fiction' or 'Nonfiction' case sensitive"
+    "Return JSON for the schema. Map genre-related terms to one of the specific enum values: "
+    "Fiction, Nonfiction. "
+    "Examples of mapping with HIGH CONFIDENCE:\n"
+    "- 'fiction', 'novel', 'story', 'sci-fi', 'fantasy', 'romance', 'mystery', 'thriller', 'horror' → 'Fiction'\n"
+    "- 'non-fiction', 'nonfiction', 'biography', 'memoir', 'history', 'self-help', 'textbook', 'manual' → 'Nonfiction'\n"
+    "- 'autobiography', 'documentary', 'guide', 'cookbook', 'reference', 'encyclopedia' → 'Nonfiction'\n"
+    "- 'science fiction', 'historical fiction', 'young adult fiction' → 'Fiction'\n"
+    "Only return a value if you can map with HIGH CONFIDENCE to Fiction or Nonfiction. "
+    "If ambiguous, vague, or no clear genre detected, return null. "
+    "Output must be exactly 'Fiction' or 'Nonfiction' (case sensitive)."
 )
 
 NONFICTION_RE = re.compile(r'(?<![A-Za-z])non[^A-Za-z]*fiction', re.I)
