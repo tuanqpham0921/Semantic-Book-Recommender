@@ -71,20 +71,33 @@ _PAGES_SCHEMA = {
         "additionalProperties": False,
         "properties": {
             "pages_min": {"type": ["integer", "null"], "minimum": 0},
-            "pages_max": {"type": ["integer", "null"], "minimum": 0},
+            "pages_max": {"type": ["integer", "null"], "minimum": 0}
         },
         "required": ["pages_min", "pages_max"]
     }
 }
 _PAGES_SYS = (
-    "Return JSON for the schema. Extract numeric page bounds if explicitly stated:\n"
-    "- pages_min for phrases like 'at least N', 'N or more', 'over N', 'more than N'.\n"
-    "- pages_max for phrases like 'under N', 'less than N', 'no more than N', 'max N'.\n"
-    "If not stated, set the respective value to null. Do not infer."
+    "Return JSON for the schema. Extract numeric page constraints ONLY if the query explicitly mentions 'page' or 'pages' with a number:\n"
+    "- pages_min for phrases like 'at least N pages', 'N or more pages', 'over N pages', 'more than N pages' (INCLUSIVE - use the exact number N)\n"
+    "- pages_max for phrases like 'under N pages', 'less than N pages', 'no more than N pages', 'max N pages', 'up to N pages' (INCLUSIVE - use the exact number N)\n"
+    "IGNORE exact page requests like 'exactly N pages', 'N pages', 'around N pages' - books don't have exact page counts since they vary by edition.\n"
+    "Examples:\n"
+    "- 'over 250 pages' → pages_min: 250 (inclusive)\n"
+    "- 'at least 200 pages' → pages_min: 200\n"
+    "- 'under 300 pages' → pages_max: 300 (inclusive)\n"
+    "- 'books with 400 pages' → all null (ignore exact)\n"
+    "- 'exactly 350 pages' → all null (ignore exact)\n"
+    "- 'around 180 pages' → all null (ignore exact)\n"
+    "- 'over 250' (no 'pages' word) → all null\n"
+    "- 'books about space' (no page numbers) → all null\n"
+    "CRITICAL: Must contain both a number AND the word 'page'/'pages'. Only extract ranges (min/max), never exact values."
 )
 def extract_pages(query: str) -> Dict[str, Optional[int]]:
     out = _so(query, _PAGES_SYS, _PAGES_SCHEMA)
-    return {"pages_min": out["pages_min"], "pages_max": out["pages_max"]}
+    return {
+        "pages_min": out["pages_min"], 
+        "pages_max": out["pages_max"]
+    }
 
 # -----------------------
 # Published Year (min/max)
@@ -303,7 +316,6 @@ def assemble_filters(query: str) -> Dict[str, Any]:
     pages = extract_pages(query)
     genre = extract_genre(query)
     child = extract_children(query)
-    keywords = extract_keywords(query)
     author = extract_authors(query)
 
     years = extract_published_year(query)
@@ -320,8 +332,9 @@ def assemble_filters(query: str) -> Dict[str, Any]:
     if any(value is not None for value in years.values()):
         filters["published_year"] = years
 
+    keywords = extract_keywords(query, filters)
     # clean the keywords and make sure that it's good
-    remove_keywords_duplicates(keywords, filters)
+    # remove_keywords_duplicates(keywords, filters)
     if keywords: 
         filters["keywords"] = keywords
 
