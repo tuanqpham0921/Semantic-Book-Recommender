@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 filter_categories = ("tone", "pages_max", "pages_min", "genre", "children", "keywords")
 genre_options = ("Fiction", "Nonfiction", "Children's Fiction", "Children's Nonfiction")
-tone_options = ("joy", "surprise", "anger", "fear", "sadness")
+tone_options = ("anger", "disgust", "fear", "joy", "sadness", "surprise")
 
 # perform the pre filters like Authors, Genre, and Pages
 def apply_pre_filters(books: pd.DataFrame, filters: dict, filterValidation: dict) -> pd.DataFrame:
