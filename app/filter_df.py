@@ -101,14 +101,15 @@ def rerank_books_by_keywords_and_tone(books: pd.DataFrame, filters: dict, filter
     ranked_books = books.copy()
     ranked_books['rerank_score'] = 0.0
     
-    # 1. KEYWORD RELEVANCE SCORING
+    # 1. KEYWORD RELEVANCE SCORING 
     if "keywords" in filters and filters["keywords"]:
-        keywords = filters["keywords"]
-        logger.info(f"Re-ranking based on keywords: {keywords}")
+        keywords_list = filters.get("keywords")
+        logger.info(f"Re-ranking based on keywords: {keywords_list}")
         
-        for keyword in keywords:
-            # Score based on keyword frequency in description
-            keyword_freq = ranked_books['description'].str.count(keyword, case=False).fillna(0)
+        for keyword in keywords_list:
+            # Score based on keyword frequency in description (case-insensitive)
+            # Convert to lowercase for case-insensitive counting
+            keyword_freq = ranked_books['description'].str.lower().str.count(keyword.lower()).fillna(0)
             
             # Score based on keyword in title (higher weight)
             title_match = ranked_books['title'].str.contains(keyword, case=False, na=False).astype(int) * 2
