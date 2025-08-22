@@ -30,7 +30,7 @@ def _so(query: str, system: str, schema: dict, extra: dict | None = None) -> dic
 # -----------------------
 # 1) Tone (exact phrase)
 # -----------------------
-tone_options = ("anger", "disgust", "fear", "joy", "sadness", "surprise")
+tone_options = ("anger", "disgust", "fear", "joy", "sadness", "surprise", "neutral")
 
 _TONE_SCHEMA = {
     "name": "ToneExtraction",
@@ -44,7 +44,7 @@ _TONE_SCHEMA = {
 }
 _TONE_SYS = (
     "Return JSON for the schema. Map tone/mood phrases to one of the specific enum values: "
-    "anger, disgust, fear, joy, sadness, surprise. "
+    "anger, disgust, fear, joy, sadness, surprise, neutral. "
     "Examples of mapping with HIGH CONFIDENCE:\n"
     "- 'happy', 'uplifting', 'cheerful', 'optimistic', 'not sad' → 'joy'\n"
     "- 'scary', 'frightening', 'terrifying', 'horror' → 'fear'\n"
@@ -52,6 +52,7 @@ _TONE_SYS = (
     "- 'furious', 'enraged', 'hostile', 'bitter' → 'anger'\n"
     "- 'shocking', 'unexpected', 'twist', 'plot twist' → 'surprise'\n"
     "- 'revolting', 'repulsive', 'sickening', 'nauseating' → 'disgust'\n"
+    "- 'balanced', 'objective', 'even-toned', 'matter-of-fact', 'neither happy nor sad' → 'neutral'\n"
     "Only return a value if you can map with HIGH CONFIDENCE. "
     "If ambiguous, vague, or no clear tone detected, return null."
 )
