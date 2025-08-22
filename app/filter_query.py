@@ -227,13 +227,39 @@ _KEYWORDS_SCHEMA = {
     }
 }
 _KEYWORDS_SYS = (
-    "Return JSON for the schema. Extract exact proper names/terms from the query (places, regions, countries, "
-    "cities, planets, nationalities, historical events, decades tokens), e.g., 'New York', 'Asia', 'UK', 'Mars', "
-    "'World War II', '1980s', preserving the original casing as written. Do NOT include generic nouns "
-    "like 'dragons', 'terraforming', 'first contact'. Do NOT include author names. If none, return an empty list."
+    "Return JSON for the schema. Extract meaningful entities and noun phrases from the query with HIGH CONFIDENCE. "
+    "Focus on:\n"
+    "1. ENTITIES: proper names (places, regions, countries, cities, planets, nationalities, historical events, decades)\n"
+    "2. TOPICS: significant themes, concepts, objects, subjects (NOT genre categories)\n"
+    "3. NOUN PHRASES: meaningful descriptive terms\n\n"
+    "Examples of what TO EXTRACT:\n"
+    "- Places: 'New York', 'Mars', 'Victorian England', 'France'\n"
+    "- Events: 'World War II', 'Cold War', 'Renaissance'\n" 
+    "- Decades: '1980s', '1960s' (when referring to time period/era)\n"
+    "- Specific topics: 'dragons', 'artificial intelligence', 'space exploration', 'detective work'\n"
+    "- Concepts: 'terraforming', 'first contact', 'time travel', 'vampire mythology'\n"
+    "- Activities: 'colonization', 'ethics', 'mythology'\n\n"
+    "EXCLUDE with HIGH CONFIDENCE:\n"
+    "- Filler words: a, an, the, and, or, but, with, about, for, in, on, at, I, you, want, need, looking\n"
+    "- Generic book terms: book, books, novel, novels, story, stories, fiction, nonfiction, literature, reading\n"
+    "- Page constraints: pages, page, under, over, at least, no more than, any number + pages\n"
+    "- Publication years: 1990, 2010, 2000 (when used for 'published in/after/before')\n"
+    "- Tone/emotion: happy, sad, scary, fear, joy, anger, neutral, horror, uplifting, depressing\n"
+    "- Genre categories: mystery, romance, thriller, fantasy, science fiction, horror (these are handled separately)\n"
+    "- Generic verbs: is, are, was, were, have, has, had, do, does, did, can, could, would\n"
+    "- Children terms: children, kids, child (when referring to target audience)\n"
+    "- Author names: ANY author names are handled separately, NEVER include them\n"
+    "- Book titles: if query appears to be just a book title with author, extract ONLY meaningful content topics\n"
+    "- Any terms that match existing filters in context.existing_filters\n\n"
+    "IMPORTANT: If context.existing_filters contains authors, do NOT extract any author names. "
+    "If it contains genre info, focus only on content topics, not genre terms. "
+    "Only extract entities and specific topics that exist EXACTLY in the query and are NOT already captured. "
+    "Preserve original casing. If no meaningful entities or topics found, return empty list."
 )
-def extract_keywords(query: str) -> List[str]:
-    out = _so(query, _KEYWORDS_SYS, _KEYWORDS_SCHEMA)
+def extract_keywords(query: str, filters: Dict[str, Any] = None) -> List[str]:
+    # Pass existing filters as context to avoid duplication
+    extra_context = {"existing_filters": filters or {}}
+    out = _so(query, _KEYWORDS_SYS, _KEYWORDS_SCHEMA, extra=extra_context)
     return out["keywords"]
 
 # -----------------------
