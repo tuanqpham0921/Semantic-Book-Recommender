@@ -265,7 +265,7 @@ _AUTHORS_SCHEMA = {
         "type": "object",
         "additionalProperties": False,
         "properties": {
-            "keywords": {
+            "names": {
                 "type": "array",
                 "items": {"type": "string", "minLength": 1}
             }
