@@ -151,58 +151,6 @@ def rerank_books_by_keywords_and_tone(books: pd.DataFrame, filters: dict, filter
     return result
 
 
-# def enhanced_apply_post_filters(books: pd.DataFrame, filters: dict, filterValidation: dict, k: int = 10) -> pd.DataFrame:
-#     """
-#     Enhanced post-filtering with advanced re-ranking.
-#     Replaces the basic apply_post_filters function.
-#     """
-#     # First apply basic filtering (names/keywords)
-#     if "names" in filters and filters["names"] is not None:
-#         logger.info("APPLYING names filter")
-#         names = filters["names"]
-        
-#         len_books_before = len(books)
-#         name_mask = books["description"].str.contains('|'.join(names), case=False, na=False, regex=True)
-#         books = books[name_mask]
-        
-#         validate_keywords_filter(books, filters["names"], filterValidation, len_books_before)
-    
-#     # Apply advanced re-ranking
-#     reranked_books = rerank_books_by_keywords_and_tone(books, filters, k)
-    
-#     # Validate tone filtering if applied
-#     if "tone" in filters and filters["tone"] is not None and filters["tone"] in tone_options:
-#         validate_tone_filter(reranked_books, filters["tone"], filterValidation, len(books))
-    
-#     logger.info("Finished applying enhanced post filters with re-ranking")
-#     return reranked_books
-
-# perform the post filters tone and key_words
-# prioritizing the names first, then just returning the top k sorted by tone
-def apply_post_filters(books: pd.DataFrame, filters: dict, filterValidation: dict, k = 10) -> pd.DataFrame:
-
-    # Filter books where any of the specified names appears in the description
-    if "names" in filters and filters["names"] is not None:
-        logger.info("APPLYING names filter")
-        names = filters["names"]
-        
-        len_books_before = len(books)
-        name_mask = books["description"].str.contains('|'.join(names), case=False, na=False, regex=True)
-        books = books[name_mask]
-
-        validate_keywords_filter(books, filters["names"], filterValidation, len_books_before)
-
-    # Sort by tone and return the top k
-    # added an extra check to be sure before sorting
-    if "tone" in filters and filters["tone"] is not None and filters["tone"] in tone_options:
-        len_books_before = len(books)
-        books = books.sort_values(by=filters["tone"], ascending=False)
-        
-        validate_tone_filter(books, filters["tone"], filterValidation, len_books_before)
-
-    logger.info("Finished applying post filters")
-    return books.head(k)
-
 if __name__ == "__main__":
     # quick smoke tests
     from config import BOOKS_PATH
