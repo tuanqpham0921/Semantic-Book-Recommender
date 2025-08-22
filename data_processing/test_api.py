@@ -31,27 +31,25 @@ def print_result(result, query):
     # Print wider header row
     print(
         f"{'Title'[:60].ljust(62)}"
+        f"{'Rank Score'.ljust(6)}"
         f"{'Authors'[:30].ljust(32)}"
         f"{'Genre'[:25].ljust(27)}"
         f"{'Num Pages'.rjust(10)}"
     )
     print("-" * 110)
 
-    for book in result:
+    for i, book in enumerate(result, 1):
         # Safely get values with fallbacks
         title = book.get('title', 'Unknown Title')
         authors = book.get('authors', 'Unknown Author')
         categories = book.get('simple_categories', 'Unknown Genre')
         num_pages = book.get('num_pages', 'N/A')
-        
-        # Handle None values
-        title = 'None' if title is None else str(title)
-        authors = 'None' if authors is None else str(authors)
-        categories = 'None' if categories is None else str(categories)
-        num_pages = 'None' if num_pages is None else str(num_pages)
+        rerank_score = book.get('rerank_score', 0.0)
+    
         
         print(
             f"{title[:60].ljust(62)}"
+            f"{str(rerank_score).ljust(6)}"
             f"{authors[:30].ljust(32)}"
             f"{categories[:25].ljust(27)}"
             f"{num_pages.rjust(10)}"
@@ -298,7 +296,7 @@ def batch_test():
 #================================================
 #================================================
 def single_test():
-    query = "A novel published in 1984"
+    query = "I want something like The Midnight Library but less depressing"
 
     payload = {"description": query}
     
