@@ -176,8 +176,19 @@ _CHILDREN_SCHEMA = {
     }
 }
 _CHILDREN_SYS = (
-    "Return JSON for the schema. Set children=true if the query mentions children/kid/kids/child/children’s/"
-    "childrens/kids' (any case). Otherwise children=false. Do not infer."
+    "Return JSON for the schema. Set children=true ONLY if the user is specifically looking for books "
+    "INTENDED FOR children/kids to read (children's literature, kids' books, young readers). "
+    "Require HIGH CONFIDENCE based on explicit user intent, do NOT infer from book titles alone.\n"
+    "Examples that should be TRUE:\n"
+    "- 'books for kids', 'children's books', 'kids' stories', 'young readers'\n"
+    "- 'picture books', 'books for my 8-year-old', 'elementary school reading'\n"
+    "Examples that should be FALSE:\n"
+    "- 'books about children' (about children but not for children)\n"
+    "- 'Children of the Corn', 'missing children story' (mentions children in title/plot)\n"
+    "- 'Charlie and the Chocolate Factory' (just a title, no explicit intent for children)\n"
+    "- 'parenting books', 'child psychology' (for adults about children)\n"
+    "Only return true with HIGH CONFIDENCE if user explicitly wants books FOR children to read. "
+    "If just mentioning a title or unclear intent, return false."
 )
 def extract_children(query: str) -> bool:
     out = _so(query, _CHILDREN_SYS, _CHILDREN_SCHEMA)
