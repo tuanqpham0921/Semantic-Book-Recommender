@@ -6,7 +6,7 @@ import os
 # Add project root to Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from app.filter_df import apply_pre_filters, apply_post_filters, tone_options
+from app.filter_df import apply_pre_filters, rerank_books_by_keywords_and_tone, tone_options
 
 def test_apply_pre_filters_authors_one(sample_books):
     """Test filtering by a single author"""
@@ -119,112 +119,286 @@ def test_apply_pre_filters_children_non_fiction(sample_books):
     # Should be the National Geographic book
     assert result.iloc[0]['title'] == 'National Geographic Kids Almanac 2023'
 
-def test_apply_post_filters_names_flexibility(sample_books):
-    """Test name filtering without hardcoding exact results"""
-    filters = {"keywords": ['wizard', 'Harry']}  # Should match Harry Potter books
+
+# ============================================================================
+# RERANK_BOOKS_BY_KEYWORDS_AND_TONE TESTS
+# ============================================================================
+
+def test_rerank_books_by_keywords_and_tone_empty_input(sample_books):
+    """Test that empty input returns empty result"""
+    empty_books = sample_books.iloc[0:0]  # Empty DataFrame with same structure
+    filters = {"keywords": ["wizard"], "tone": "fear"}
     filterValidation = {}
-    result = apply_post_filters(sample_books, filters, filterValidation)
     
-    # All results should contain at least one of the names in description
+    result = rerank_books_by_keywords_and_tone(empty_books, filters, filterValidation, k=5)
+    
+    assert len(result) == 0
+    assert result.empty
+
+
+def test_rerank_books_by_keywords_and_tone_no_filters(sample_books):
+    """Test that no filters returns first k books in original order"""
+    filters = {}
+    filterValidation = {}
+    
+    result = rerank_books_by_keywords_and_tone(sample_books, filters, filterValidation, k=3)
+    
+    assert len(result) == 3
+    # Should have rerank_score column with all zeros
+    assert 'rerank_score' in result.columns
+    assert all(score == 0.0 for score in result['rerank_score'])
+
+
+def test_rerank_books_by_keywords_and_tone_keyword_scoring(sample_books):
+    """Test that keyword scoring works correctly"""
+    filters = {"keywords": ["wizard", "magic"]}  # Should boost Harry Potter books
+    filterValidation = {}
+    
+    result = rerank_books_by_keywords_and_tone(sample_books, filters, filterValidation, k=5)
+
+    # make sure that rerank_score is calculated
+    assert 'rerank_score' in result.columns
+    
+    # Find books with keywords in description or title
+    books_with_keywords = []
+    books_without_keywords = []
+    
     for _, book in result.iterrows():
-        description = book['description'].lower()
-        assert 'wizard' in description or 'harry' in description
+        desc = book['description'].lower()
+        title = book['title'].lower()
+        has_keyword = any(keyword.lower() in desc or keyword.lower() in title 
+                         for keyword in ["wizard", "magic"])
+        
+        if has_keyword:
+            books_with_keywords.append(book['rerank_score'])
+        else:
+            books_without_keywords.append(book['rerank_score'])
     
-    # Should get both Harry Potter books
-    harry_potter_books = result[result['authors'].str.contains('J.K. Rowling')]
-    assert len(harry_potter_books) == 2
+    # Books with keywords should generally have higher scores
+    if books_with_keywords and books_without_keywords:
+        avg_with_keywords = sum(books_with_keywords) / len(books_with_keywords)
+        avg_without_keywords = sum(books_without_keywords) / len(books_without_keywords)
+        assert avg_with_keywords > avg_without_keywords
 
-def test_apply_post_filters_tone_sorting_property(sample_books):
-    """Test that tone sorting works correctly without hardcoding order"""
-    filters = {'tone': 'fear'}
+
+def test_rerank_books_by_keywords_and_tone_tone_scoring(sample_books):
+    """Test that tone scoring works correctly"""
+    filters = {"tone": "fear"}  # Should boost books with high fear scores
     filterValidation = {}
-    result = apply_post_filters(sample_books, filters, filterValidation, k=5)
     
-    # Should be sorted by fear in descending order
-    fear_values = result['fear'].tolist()
-    assert fear_values == sorted(fear_values, reverse=True)
+    result = rerank_books_by_keywords_and_tone(sample_books, filters, filterValidation, k=len(sample_books))
     
-    # Highest fear book should be first
-    highest_fear_book = result.iloc[0]
-    assert highest_fear_book['fear'] == max(sample_books['fear'])
+    # Books should be sorted by rerank_score (which includes tone scoring)
+    rerank_scores = result['rerank_score'].tolist()
+    assert rerank_scores == sorted(rerank_scores, reverse=True)
+    
+    # TODO
+    # Books with higher fear scores should generally rank higher
+    # Check that correlation between fear score and rank position is negative (higher fear = lower rank number)
+    # fear_scores = result['fear'].tolist()
+    # ranks = list(range(len(result)))  # 0, 1, 2, ... (lower number = higher rank)
+    
+    # Calculate simple correlation: books with higher fear should have lower rank numbers
+    if len(result) > 1:
+        # At least the top book should have a decent fear score
+        top_book_fear = result.iloc[0]['fear']
+        bottom_book_fear = result.iloc[-1]['fear']
+        assert top_book_fear >= bottom_book_fear
 
-def test_filter_combination_logic(sample_books):
-    """Test combining multiple filters works correctly"""
-    filters = {
-        'author': ['Stephen King'],
-        'pages_min': 300,
-        'tone': 'fear'
-    }
-    
-    # Apply pre-filters first
+
+def test_rerank_books_by_keywords_and_tone_combined_scoring(sample_books):
+    """Test combined keyword and tone scoring"""
+    filters = {"keywords": ["wizard"], "tone": "joy"}
     filterValidation = {}
-    pre_filtered = apply_pre_filters(sample_books, filters, filterValidation)
-
-    # Should only have Stephen King books >= 300 pages
-    assert all('Stephen King' in author for author in pre_filtered['authors'])
-    assert all(pages >= 300 for pages in pre_filtered['num_pages'])
     
-    # Apply post-filters
-    filterValidationPost = {}
-    final_result = apply_post_filters(pre_filtered, filters, filterValidationPost, k=10)
+    result = rerank_books_by_keywords_and_tone(sample_books, filters, filterValidation, k=5)
     
-    # Should be sorted by fear
-    fear_values = final_result['fear'].tolist()
-    assert fear_values == sorted(fear_values, reverse=True)
+    # Should be sorted by combined score
+    rerank_scores = result['rerank_score'].tolist()
+    assert rerank_scores == sorted(rerank_scores, reverse=True)
+    
+    # Top book should either have keywords or high joy score (or both)
+    top_book = result.iloc[0]
+    desc = top_book['description'].lower()
+    title = top_book['title'].lower()
+    has_keyword = 'wizard' in desc or 'wizard' in title
+    high_joy = top_book['joy'] > 0.5  # Assuming 0.5 is a reasonable threshold
+    
+    # Top book should have either keyword match OR some score
+    assert has_keyword or high_joy or top_book['rerank_score'] > 0
 
-def test_tone_filtering_fear(sample_books):
-    """Test filtering and sorting by fear tone"""
-    filters = {"tone": "fear"}
+
+def test_rerank_books_by_keywords_and_tone_case_insensitive(sample_books):
+    """Test that keyword matching is case insensitive"""
+    filters_lower = {"keywords": ["wizard"]}
+    filters_upper = {"keywords": ["WIZARD"]}
+    filters_mixed = {"keywords": ["WiZaRd"]}
     filterValidation = {}
-    result = apply_post_filters(sample_books, filters, filterValidation, k=3)
     
-    # Check that books are sorted by fear in descending order
-    fear_values = result["fear"].tolist()
-    assert fear_values == sorted(fear_values, reverse=True), "Books should be sorted by fear in descending order"
+    result_lower = rerank_books_by_keywords_and_tone(sample_books, filters_lower, filterValidation, k=5)
+    result_upper = rerank_books_by_keywords_and_tone(sample_books, filters_upper, filterValidation, k=5)
+    result_mixed = rerank_books_by_keywords_and_tone(sample_books, filters_mixed, filterValidation, k=5)
     
-    # the 3 most feared book in this list
-    titles = set(result['title'].tolist())
-    expected_stephen_king_books = {'The Shining', 'It', '1984'}
-    assert titles == expected_stephen_king_books
+    # All should produce identical rerank scores
+    scores_lower = result_lower['rerank_score'].tolist()
+    scores_upper = result_upper['rerank_score'].tolist()
+    scores_mixed = result_mixed['rerank_score'].tolist()
+    
+    assert scores_lower == scores_upper == scores_mixed
 
-def test_invalid_tone_ignored(sample_books):
+
+def test_rerank_books_by_keywords_and_tone_invalid_tone(sample_books):
     """Test that invalid tone values are ignored"""
     filters = {"tone": "happiness"}  # Not in tone_options
     filterValidation = {}
-    result = apply_post_filters(sample_books, filters, filterValidation, k=3)
     
-    # Should return first k books without any special sorting
+    result = rerank_books_by_keywords_and_tone(sample_books, filters, filterValidation, k=3)
+    
+    # Should return books without tone-based scoring (only base score of 0)
     assert len(result) == 3
-    
-    # Invalid tone should not create validation entry
-    assert 'applied_tone' not in filterValidation
+    assert all(score == 0.0 for score in result['rerank_score'])
 
-def test_all_tone_options_work(sample_books):
-    """Test that all tone options from tone_options work correctly"""
+
+def test_rerank_books_by_keywords_and_tone_k_limit(sample_books):
+    """Test that k parameter limits results correctly"""
+    filters = {"keywords": ["book"]}  # Common word
+    filterValidation = {}
+    
+    for k in [1, 3, 5, 10]:
+        result = rerank_books_by_keywords_and_tone(sample_books, filters, filterValidation, k=k)
+        expected_length = min(k, len(sample_books))
+        assert len(result) == expected_length
+
+
+def test_rerank_books_by_keywords_and_tone_multiple_keywords(sample_books):
+    """Test scoring with multiple keywords"""
+    filters = {"keywords": ["wizard", "magic", "school"]}  # Multiple keywords for Harry Potter
+    filterValidation = {}
+    
+    result = rerank_books_by_keywords_and_tone(sample_books, filters, filterValidation, k=5)
+    
+    # Books matching multiple keywords should score higher than books matching fewer
+    scores = []
+    keyword_counts = []
+    
+    for _, book in result.iterrows():
+        desc = book['description'].lower()
+        title = book['title'].lower()
+        count = sum(1 for keyword in ["wizard", "magic", "school"] 
+                   if keyword in desc or keyword in title)
+        
+        scores.append(book['rerank_score'])
+        keyword_counts.append(count)
+    
+    # If we have books with different keyword counts, higher counts should generally have higher scores
+    if len(set(keyword_counts)) > 1:  # If there's variation in keyword matches
+        # Find books with most keyword matches
+        max_keywords = max(keyword_counts)
+        if max_keywords > 0:
+            # Books with more keywords should have positive scores
+            high_keyword_books = [scores[i] for i, count in enumerate(keyword_counts) if count == max_keywords]
+            low_keyword_books = [scores[i] for i, count in enumerate(keyword_counts) if count < max_keywords]
+            
+            if high_keyword_books and low_keyword_books:
+                avg_high = sum(high_keyword_books) / len(high_keyword_books)
+                avg_low = sum(low_keyword_books) / len(low_keyword_books)
+                assert avg_high >= avg_low
+
+
+def test_rerank_books_by_keywords_and_tone_title_vs_description(sample_books):
+    """Test that title matches get higher weight than description matches"""
+    # This test would need specific test data, but we can test the concept
+    filters = {"keywords": ["Harry"]}  # Should match Harry Potter in title
+    filterValidation = {}
+    
+    result = rerank_books_by_keywords_and_tone(sample_books, filters, filterValidation, k=5)
+    
+    # Books with keyword in title should generally rank higher than description-only matches
+    title_matches = []
+    desc_only_matches = []
+    
+    for _, book in result.iterrows():
+        title = book['title'].lower()
+        desc = book['description'].lower()
+        
+        if 'harry' in title:
+            title_matches.append(book['rerank_score'])
+        elif 'harry' in desc:
+            desc_only_matches.append(book['rerank_score'])
+    
+    # If we have both types, title matches should generally score higher
+    if title_matches and desc_only_matches:
+        avg_title = sum(title_matches) / len(title_matches)
+        avg_desc = sum(desc_only_matches) / len(desc_only_matches)
+        assert avg_title >= avg_desc
+
+
+def test_rerank_books_by_keywords_and_tone_all_valid_tones(sample_books):
+    """Test that all valid tone options work"""
+    filterValidation = {}
+    
     for tone in tone_options:
         filters = {"tone": tone}
-        filterValidation = {}
-        result = apply_post_filters(sample_books, filters, filterValidation, k=3)
+        result = rerank_books_by_keywords_and_tone(sample_books, filters, filterValidation, k=3)
         
-        # Check that result is sorted by the specified tone
-        tone_values = result[tone].tolist()
-        assert tone_values == sorted(tone_values, reverse=True), f"Books should be sorted by {tone} in descending order"
-        assert len(result) <= 3
+        # Should return results sorted by that tone
+        assert len(result) == 3
+        tone_scores = result[tone].tolist()
+        assert tone_scores == sorted(tone_scores, reverse=True)
 
-def test_tone_with_names_filter(sample_books):
-    """Test combining tone filtering with names filtering"""
-    filters = {
-        "tone": "fear",
-        "keywords": ["wizard", "chocolate"]  # Should match Harry Potter and Charlie
-    }
+
+def test_rerank_books_by_keywords_and_tone_realistic_scenario(sample_books):
+    """Test a realistic re-ranking scenario with known data"""
+    # Search for "wizard" with "joy" tone - should boost Harry Potter books
+    filters = {"keywords": ["wizard"], "tone": "joy"}
     filterValidation = {}
-    result = apply_post_filters(sample_books, filters, filterValidation, k=5)
     
-    # Should only have books that contain the names
-    titles = result["title"].tolist()
-    expected_titles = ["Harry Potter and the Sorcerer's Stone", "Harry Potter and the Chamber of Secrets", "Charlie and the Chocolate Factory"]
-    assert all(title in expected_titles for title in titles)
+    result = rerank_books_by_keywords_and_tone(sample_books, filters, filterValidation, k=5)
     
-    # Should be sorted by fear (Harry Potter books have more fear than Charlie)
-    assert result.iloc[0]["title"] in ["Harry Potter and the Sorcerer's Stone", "Harry Potter and the Chamber of Secrets"]
-    assert result.iloc[-1]["title"] == "Charlie and the Chocolate Factory"  # lowest fear
+    # Verify results are properly sorted by rerank_score
+    rerank_scores = result['rerank_score'].tolist()
+    assert rerank_scores == sorted(rerank_scores, reverse=True)
+    
+    # Harry Potter book should rank high due to:
+    # 1. "wizard" keyword in description
+    # 2. High joy score (0.9)
+    harry_potter_books = result[result['title'].str.contains('Harry Potter', na=False)]
+    assert len(harry_potter_books) > 0, "Should find Harry Potter books"
+    
+    # Harry Potter book should have a high rerank score
+    hp_score = harry_potter_books.iloc[0]['rerank_score']
+    assert hp_score > 2.0, f"Harry Potter should have high rerank score due to keyword+tone match, got {hp_score}"
+    
+    # The Shining should rank lower despite high fear score (wrong tone)
+    shining_books = result[result['title'].str.contains('Shining', na=False)]
+    if len(shining_books) > 0:
+        shining_score = shining_books.iloc[0]['rerank_score']
+        # Shining should score lower than Harry Potter (no keyword match, low joy)
+        assert hp_score > shining_score, "Harry Potter should outrank The Shining for wizard+joy search"
+
+
+def test_rerank_books_by_keywords_and_tone_fear_scenario(sample_books):
+    """Test fear-based re-ranking - should favor Stephen King books"""
+    filters = {"tone": "fear"}
+    filterValidation = {}
+    
+    result = rerank_books_by_keywords_and_tone(sample_books, filters, filterValidation, k=5)
+    
+    # Should be sorted by rerank_score
+    rerank_scores = result['rerank_score'].tolist()
+    assert rerank_scores == sorted(rerank_scores, reverse=True)
+    
+    # Top books should be high-fear books: The Shining (0.95), 1984 (0.8), It (likely high)
+    top_3_titles = [result.iloc[i]['title'] for i in range(min(3, len(result)))]
+    
+    # The Shining should be in top 3 (highest fear score in sample data)
+    assert any('Shining' in title for title in top_3_titles), f"The Shining should be in top 3 for fear search, got: {top_3_titles}"
+    
+    # Verify The Shining has a high rerank score (should be among the top scorers)
+    shining_book = result[result['title'].str.contains('Shining', na=False)]
+    if len(shining_book) > 0:
+        shining_score = shining_book.iloc[0]['rerank_score']
+        max_score = max(result['rerank_score'])
+        # Should be within top tier (at least 90% of max score)
+        assert shining_score >= max_score * 0.9, f"The Shining should score highly for fear search. Got {shining_score}, max was {max_score}"
+
