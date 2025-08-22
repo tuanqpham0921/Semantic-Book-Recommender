@@ -13,7 +13,7 @@ class FilterSchema(BaseModel):
     pages_max: Optional[int] = Field(default=None)
     tone: Optional[str] = Field(default=None)
     children: Optional[bool] = Field(default=None)
-    names: Optional[List[str]] = Field(default=None)
+    keywords: Optional[List[str]] = Field(default=None)
     published_year: Optional[dict] = Field(default=None)
 
 class ReasoningResponse(BaseModel):

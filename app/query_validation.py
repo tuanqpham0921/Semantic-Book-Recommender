@@ -92,15 +92,15 @@ def is_valid_query(query: str) -> bool:
         return False
     
 
-def remove_keywords_duplicates(names: List[str], filters: Dict[str, Any]):
-    """Remove duplicate names from the filters in-place.
+def remove_keywords_duplicates(keywords: List[str], filters: Dict[str, Any]):
+    """Remove duplicate keywords from the filters in-place.
 
     Matching is performed case-insensitively (normalized with strip().lower()).
-    The function mutates the provided `names` list so callers that rely on
+    The function mutates the provided `keywords` list so callers that rely on
     in-place behavior continue to work.
     """
 
-    if not names: return 
+    if not keywords: return
 
     def _norm(s: str) -> str:
         return s.strip().lower()
@@ -130,7 +130,7 @@ def remove_keywords_duplicates(names: List[str], filters: Dict[str, Any]):
     # Filter names in-place while preserving original order and removing duplicates
     cleaned = []
     seen = set()
-    for n in names:
+    for n in keywords:
         # Preserve non-string items as-is (avoid accidental dropping)
         kn = _norm(n)
         if kn in tokens_to_remove or kn in seen:
@@ -139,8 +139,8 @@ def remove_keywords_duplicates(names: List[str], filters: Dict[str, Any]):
         cleaned.append(n)
         seen.add(kn)
 
-    names.clear()
-    names.extend(cleaned)
+    keywords.clear()
+    keywords.extend(cleaned)
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ from app.filter_validation import (
 # Get the logger (same configuration as main.py)
 logger = logging.getLogger(__name__)
 
-filter_categories = ("tone", "pages_max", "pages_min", "genre", "children", "names")
+filter_categories = ("tone", "pages_max", "pages_min", "genre", "children", "keywords")
 genre_options = ("Fiction", "Nonfiction", "Children's Fiction", "Children's Nonfiction")
 tone_options = ("joy", "surprise", "anger", "fear", "sadness")
 
@@ -88,7 +88,7 @@ def rerank_books_by_keywords_and_tone(books: pd.DataFrame, filters: dict, filter
     
     Args:
         books: DataFrame of candidate books
-        filters: Dictionary containing 'names' (keywords) and 'tone' filters
+        filters: Dictionary containing "keywords" (keywords) and 'tone' filters
         k: Number of top books to return
     
     Returns:
@@ -102,8 +102,8 @@ def rerank_books_by_keywords_and_tone(books: pd.DataFrame, filters: dict, filter
     ranked_books['rerank_score'] = 0.0
     
     # 1. KEYWORD RELEVANCE SCORING
-    if "names" in filters and filters["names"]:
-        keywords = filters["names"]
+    if "keywords" in filters and filters["keywords"]:
+        keywords = filters["keywords"]
         logger.info(f"Re-ranking based on keywords: {keywords}")
         
         for keyword in keywords:
@@ -226,7 +226,7 @@ if __name__ == "__main__":
 
     # Example 2: Re-ranking with keywords and tone
     rerank_filters = {
-        "names": ["love", "war", "future"],  # Keywords to search for
+        "keywords": ["love", "war", "future"],  # Keywords to search for
         "tone": "joy"  # Target emotional tone
     }
 

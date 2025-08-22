@@ -15,7 +15,7 @@
       "expected": {
          "content": "a novel set during the American Revolution",
          "filters": {
-            "names": [
+            "keywords": [
                "American Revolution"
             ]
          }
@@ -112,7 +112,7 @@
          "content": "a gripping crime thriller",
          "filters": {
             "tone": "somber",
-            "names": [
+            "keywords": [
                "New York"
             ]
          }
@@ -188,7 +188,7 @@
       "expected": {
          "content": "a detective novel set in Victorian London",
          "filters": {
-            "names": [
+            "keywords": [
                "Victorian London"
             ]
          }
@@ -212,7 +212,7 @@
       "expected": {
          "content": "a travel memoir about backpacking through Asia",
          "filters": {
-            "names": [
+            "keywords": [
                "Asia"
             ]
          }
@@ -424,7 +424,7 @@
       "expected": {
          "content": "a coming-of-age novel set in the 1980s",
          "filters": {
-            "names": [
+            "keywords": [
                "1980s"
             ]
          }
@@ -492,7 +492,7 @@
       "expected": {
          "content": "a mystery novel set in a small coastal town in Portugal",
          "filters": {
-            "names": [
+            "keywords": [
                "Portugal"
             ]
          }
@@ -517,7 +517,7 @@
       "expected": {
          "content": "a romantic adventure in the mountains of italy",
          "filters": {
-            "names": [
+            "keywords": [
                "italy"
             ]
          }
@@ -530,7 +530,7 @@
       "expected": {
          "content": "a futuristic novel about Mars colonization and terraforming",
          "filters": {
-            "names": [
+            "keywords": [
                "Mars"
             ]
          }
@@ -558,7 +558,7 @@
          "filters": {
             "genre": "non-fiction",
             "pages_min": 120,
-            "names": [
+            "keywords": [
                "UK"
             ]
          }
@@ -571,7 +571,7 @@
       "expected": {
          "content": "a mystery novel set in paris",
          "filters": {
-            "names": [
+            "keywords": [
                "paris"
             ]
          }
@@ -620,7 +620,7 @@
          "filters": {
             "genre": "non-fiction",
             "tone": "somber",
-            "names": [
+            "keywords": [
                "World War II"
             ]
          }
@@ -635,7 +635,7 @@
          "filters": {
             "genre": "fiction",
             "pages_max": 180,
-            "names": [
+            "keywords": [
                "New york"
             ]
          }
@@ -648,7 +648,7 @@
       "expected": {
          "content": "Books by George Orwell and Aldous Huxley",
          "filters": {
-            "names": [
+            "keywords": [
                "George Orwell",
                "Aldous Huxley"
             ]
@@ -662,7 +662,7 @@
       "expected": {
          "content": "Novels by J.K. Rowling",
          "filters": {
-            "names": [
+            "keywords": [
                "J.K. Rowling"
             ]
          }
@@ -675,7 +675,7 @@
       "expected": {
          "content": "The works of Agatha Christie",
          "filters": {
-            "names": [
+            "keywords": [
                "Agatha Christie"
             ]
          }

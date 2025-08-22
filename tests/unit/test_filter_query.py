@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 from app.filter_query import (
     extract_tone, extract_pages, extract_genre, 
-    extract_children, extract_names, extract_authors,
+    extract_children, extract_keywords, extract_authors,
     assemble_filters, extract_query_filters, standardized_genre,
     extract_published_year
 )
@@ -79,13 +79,13 @@ class TestFilterQueryMocked:
         assert result is False
 
     @patch('app.filter_query.client')
-    def test_extract_names_with_mock(self, mock_client):
+    def test_extract_keywords_with_mock(self, mock_client):
         """Test name extraction logic"""
         mock_response = MagicMock()
-        mock_response.choices[0].message.content = '{"names": ["New York", "Mars"]}'
+        mock_response.choices[0].message.content = '{"keywords": ["New York", "Mars"]}'
         mock_client.chat.completions.create.return_value = mock_response
         
-        result = extract_names("Books set in New York or Mars")
+        result = extract_keywords("Books set in New York or Mars")
         
         assert result == ["New York", "Mars"]
 
@@ -93,7 +93,7 @@ class TestFilterQueryMocked:
     def test_extract_authors_with_mock(self, mock_client):
         """Test author extraction logic"""
         mock_response = MagicMock()
-        mock_response.choices[0].message.content = '{"names": ["J.K. Rowling", "Stephen King"]}'
+        mock_response.choices[0].message.content = '{"keywords": ["J.K. Rowling", "Stephen King"]}'
         mock_client.chat.completions.create.return_value = mock_response
         
         result = extract_authors("Books by J.K. Rowling and Stephen King")
@@ -128,7 +128,7 @@ class TestFilterQueryMocked:
             with patch('app.filter_query.extract_pages', return_value={"pages_min": None, "pages_max": None}):
                 with patch('app.filter_query.extract_genre', return_value=None):
                     with patch('app.filter_query.extract_children', return_value=False):
-                        with patch('app.filter_query.extract_names', return_value=[]):
+                        with patch('app.filter_query.extract_keywords', return_value=[]):
                             with patch('app.filter_query.extract_authors', return_value=[]):
                                 
                                 result = assemble_filters("just a simple query")
@@ -142,7 +142,7 @@ class TestFilterQueryMocked:
             with patch('app.filter_query.extract_pages', return_value={"pages_min": 100, "pages_max": 300}):
                 with patch('app.filter_query.extract_genre', return_value="fiction"):
                     with patch('app.filter_query.extract_children', return_value=True):
-                        with patch('app.filter_query.extract_names', return_value=["London"]):
+                        with patch('app.filter_query.extract_keywords', return_value=["London"]):
                             with patch('app.filter_query.extract_authors', return_value=["George Orwell"]):
                                 
                                 result = assemble_filters("dark fiction by George Orwell set in London")
@@ -153,7 +153,7 @@ class TestFilterQueryMocked:
                                     "pages_max": 300,
                                     "genre": "fiction",
                                     "children": True,
-                                    "names": ["London"],
+                                    "keywords": ["London"],
                                     "author": ["George Orwell"]
                                 }
                                 assert result == expected

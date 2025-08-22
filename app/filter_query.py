@@ -5,7 +5,7 @@ from typing import Optional, Dict, Any, List
 from app.config import client, MODEL
 from app.query_validation import remove_keywords_duplicates
 
-filter_categories = ["tone", "pages_max", "pages_min", "genre", "children", "names"]
+filter_categories = ["tone", "pages_max", "pages_min", "genre", "children", "keywords"]
 # Add published_year_exact to filter categories
 filter_categories += ["published_year_min", "published_year_max", "published_year_exact"]
 
@@ -168,32 +168,32 @@ def extract_children(query: str) -> bool:
     return out["children"]
 
 # -----------------------
-# 5) Names (exact phrases)
+# 5) Keywords Extraction (exact phrases)
 # -----------------------
-_NAMES_SCHEMA = {
-    "name": "NamesExtraction",
+_KEYWORDS_SCHEMA = {
+    "name": "KeywordsExtraction",
     "strict": True,
     "schema": {
         "type": "object",
         "additionalProperties": False,
         "properties": {
-            "names": {
+            "keywords": {
                 "type": "array",
                 "items": {"type": "string", "minLength": 1}
             }
         },
-        "required": ["names"]
+        "required": ["keywords"]
     }
 }
-_NAMES_SYS = (
+_KEYWORDS_SYS = (
     "Return JSON for the schema. Extract exact proper names/terms from the query (places, regions, countries, "
     "cities, planets, nationalities, historical events, decades tokens), e.g., 'New York', 'Asia', 'UK', 'Mars', "
     "'World War II', '1980s', preserving the original casing as written. Do NOT include generic nouns "
     "like 'dragons', 'terraforming', 'first contact'. Do NOT include author names. If none, return an empty list."
 )
-def extract_names(query: str) -> List[str]:
-    out = _so(query, _NAMES_SYS, _NAMES_SCHEMA)
-    return out["names"]
+def extract_keywords(query: str) -> List[str]:
+    out = _so(query, _KEYWORDS_SYS, _KEYWORDS_SCHEMA)
+    return out["keywords"]
 
 # -----------------------
 # 6) CONTENT: extract the core content using the composed filters
@@ -249,12 +249,12 @@ _AUTHORS_SCHEMA = {
         "type": "object",
         "additionalProperties": False,
         "properties": {
-            "names": {
+            "keywords": {
                 "type": "array",
                 "items": {"type": "string", "minLength": 1}
             }
         },
-        "required": ["names"]
+        "required": ["keywords"]
     }
 }
 _AUTHORS_SYS = (
@@ -264,7 +264,7 @@ _AUTHORS_SYS = (
 )
 def extract_authors(query: str) -> List[str]:
     out = _so(query, _AUTHORS_SYS, _AUTHORS_SCHEMA)
-    return out["names"]
+    return out["keywords"]
 
 # ------------------------------
 # ----- Compose everything -----
@@ -275,7 +275,7 @@ def assemble_filters(query: str) -> Dict[str, Any]:
     pages = extract_pages(query)
     genre = extract_genre(query)
     child = extract_children(query)
-    names = extract_names(query)
+    keywords = extract_keywords(query)
     author = extract_authors(query)
 
     years = extract_published_year(query)
@@ -292,10 +292,10 @@ def assemble_filters(query: str) -> Dict[str, Any]:
     if any(value is not None for value in years.values()):
         filters["published_year"] = years
 
-    # clean the name and make sure that it's good
-    remove_keywords_duplicates(names, filters)
-    if names: 
-        filters["names"] = names
+    # clean the keywords and make sure that it's good
+    remove_keywords_duplicates(keywords, filters)
+    if keywords: 
+        filters["keywords"] = keywords
 
     return filters
 

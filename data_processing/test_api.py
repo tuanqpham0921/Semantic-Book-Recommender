@@ -18,7 +18,7 @@ prompts = [
     "get me books by Stephen King and J.K. Rowling"
 ]
 
-filters_names = ["genre", "author", "pages_min", "pages_max", "tone", "children", "names"]
+filters_names = ["genre", "author", "pages_min", "pages_max", "tone", "children", "keywords"]
 #===================================================================
 
 def print_result(result, query):
@@ -48,11 +48,11 @@ def print_result(result, query):
     
         
         print(
-            f"{title[:60].ljust(62)}"
+            f"{str(title)[:60].ljust(62)}"
             f"{str(rerank_score).ljust(6)}"
-            f"{authors[:30].ljust(32)}"
-            f"{categories[:25].ljust(27)}"
-            f"{num_pages.rjust(10)}"
+            f"{str(authors)[:30].ljust(32)}"
+            f"{str(categories)[:25].ljust(27)}"
+            f"{str(num_pages).rjust(10)}"
         )
     print("=" * 110)
 

@@ -121,7 +121,7 @@ def test_apply_pre_filters_children_non_fiction(sample_books):
 
 def test_apply_post_filters_names_flexibility(sample_books):
     """Test name filtering without hardcoding exact results"""
-    filters = {'names': ['wizard', 'Harry']}  # Should match Harry Potter books
+    filters = {"keywords": ['wizard', 'Harry']}  # Should match Harry Potter books
     filterValidation = {}
     result = apply_post_filters(sample_books, filters, filterValidation)
     
@@ -215,7 +215,7 @@ def test_tone_with_names_filter(sample_books):
     """Test combining tone filtering with names filtering"""
     filters = {
         "tone": "fear",
-        "names": ["wizard", "chocolate"]  # Should match Harry Potter and Charlie
+        "keywords": ["wizard", "chocolate"]  # Should match Harry Potter and Charlie
     }
     filterValidation = {}
     result = apply_post_filters(sample_books, filters, filterValidation, k=5)
