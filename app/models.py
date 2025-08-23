@@ -77,5 +77,13 @@ class BookRecommendationResponse(BaseModel):
     filters: FilterSchema
     content: str
 
-class OverallExplanationResponse(BaseModel):
+class OverallExplainationResponse(BaseModel):
     explain_overall_recommendation: str
+
+class BookExplainationInput(BaseModel):
+    book: BookRecommendation
+    filters: FilterSchema
+    content: str
+
+class BookExplainationResponse(BaseModel):
+    explain_book_recommendation: str

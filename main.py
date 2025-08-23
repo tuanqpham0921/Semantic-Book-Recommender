@@ -7,7 +7,8 @@ import pandas as pd
 from app.models import (
     QueryRequest, BookRecommendation, 
     ReasoningResponse, RecommendBooksRequest, 
-    BookRecommendationResponse, OverallExplanationResponse
+    BookRecommendationResponse, OverallExplainationResponse,
+    BookExplainationInput, BookExplainationResponse
 )
 from app.config import add_cors_middleware, db_books, BOOKS_PATH
 
@@ -15,7 +16,7 @@ from app.config import add_cors_middleware, db_books, BOOKS_PATH
 import app.filter_query as filter_query
 import app.filter_df as filter_df
 from app.search import similarity_search_filtered
-import app.generate_reason as generate_reason
+import app.generate_reason as generate_reason, explain_book_recommendation
 from app.query_validation import is_valid_query
 
 # Configure middleware
@@ -63,22 +64,40 @@ def reason_query_endpoint(request: QueryRequest):
             is_valid=True
         )
 
+@app.post("/reason_book", response_model=BookExplainationResponse)
+def reason_book_endpoint(request: BookExplainationInput):
+    if not request.book:
+        return BookExplainationResponse(
+            explain_book_recommendation="No book information provided."
+        )
 
-@app.post("/explain_overall_recommendation", response_model=OverallExplanationResponse)
+    if not request.filters and not request.content:
+        return BookExplainationResponse(
+            explain_book_recommendation="No filters or content provided to explain the recommendation."
+        )
+
+    # Generate explaination based on available information
+    explaination = generate_reason.explain_book_recommendation(request.book, request.filters, request.content)
+
+    return BookExplainationResponse(
+        explain_book_recommendation=explaination
+    )
+
+@app.post("/explain_overall_recommendation", response_model=OverallExplainationResponse)
 def explain_overall_recommendation(request: BookRecommendationResponse):
     messages = generate_reason.get_response_messages(request)
 
     # priortize no books found first
     if len(request.recommendations) == 0:
-        explanation = generate_reason.explain_no_books_found(messages)
+        explaination = generate_reason.explain_no_books_found(messages)
     
     # there are books 
     elif len(messages) == 0:
-        explanation = generate_reason.explain_no_filter_applied(request.content)
+        explaination = generate_reason.explain_no_filter_applied(request.content)
     else:
-        explanation = generate_reason.explain_overall_recommendation(messages)
+        explaination = generate_reason.explain_overall_recommendation(messages)
 
-    return {"explain_overall_recommendation": explanation}
+    return {"explain_overall_recommendation": explaination}
 
 # Endpoint to recommend books based on user query
 @app.post("/recommend_books", response_model=BookRecommendationResponse)

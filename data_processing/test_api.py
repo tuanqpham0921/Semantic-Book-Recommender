@@ -218,21 +218,21 @@ def print_difference_reasoning(actual, expected):
 
 # --------------------------------------------
 
-def print_explanation(result):
+def print_explaination(result):
     print("=" * 110)
-    print("EXPLANATION:")
+    print("explaination:")
     print("=" * 110)
     
     if "explain_overall_recommendation" not in result:
-        print("No explanation found.")
+        print("No explaination found.")
         print("=" * 110)
         return
 
-    explanation_text = result["explain_overall_recommendation"]
+    explaination_text = result["explain_overall_recommendation"]
     
-    # Use textwrap to format the explanation nicely
+    # Use textwrap to format the explaination nicely
     wrapped_text = textwrap.fill(
-        explanation_text, 
+        explaination_text, 
         width=100,  # Maximum line width
         initial_indent="  ",  # Indent first line
         subsequent_indent="  ",  # Indent continuation lines
@@ -244,7 +244,7 @@ def print_explanation(result):
     print("=" * 110)
     print()
 
-def get_overall_explanation(recommendation_response):
+def get_overall_explaination(recommendation_response):
 
     overal_validaiton_payload = recommendation_response
     response = requests.post(explain_overall_recommendation_url, json=overal_validaiton_payload, headers=headers)
@@ -281,11 +281,11 @@ def batch_test():
 
             recomendation_response = process_query(item["query"], payload, reasoning)
             
-            overall_explanation = get_overall_explanation(recomendation_response)
+            overall_explaination = get_overall_explaination(recomendation_response)
 
             print("=" * 110)
             print(f"PROCESSING QUERY: \n{item['query']}")
-            print_explanation(overall_explanation)
+            print_explaination(overall_explaination)
 
             print("-" * 110)
     
@@ -305,8 +305,8 @@ def single_test():
 
     recomendation_response = process_query(query, payload, reasoning)
 
-    overall_explanation = get_overall_explanation(recomendation_response)
-    print_explanation(overall_explanation)
+    overall_explaination = get_overall_explaination(recomendation_response)
+    print_explaination(overall_explaination)
 
 
 

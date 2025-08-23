@@ -1,6 +1,7 @@
 import json
 from app.models import (
-    BookRecommendationResponse
+    BookRecommendationResponse, BookRecommendation,
+    FilterSchema
 )
 from app.config import client, MODEL
 
@@ -20,7 +21,7 @@ def _so_overall(query: str, system: str, schema: dict, extra: dict | None = None
         ],
         response_format={"type": "json_schema", "json_schema": schema},
         temperature=0.7,  # Increased for more creative, conversational responses
-        max_tokens=75,    # Limit response length for concise explanations (1-2 sentences)
+        max_tokens=75,    # Limit response length for concise explainations (1-2 sentences)
         top_p=0.9,        # Nucleus sampling for better quality
         frequency_penalty=0.1,  # Slight penalty to avoid repetition
         presence_penalty=0.1,   # Encourage varied vocabulary
@@ -50,8 +51,8 @@ _EXPLAIN_OVERALL_SCHEMA = {
     "schema": {
         "type": "object",
         "additionalProperties": False,
-        "properties": {"explanation": {"type": "string"}},
-        "required": ["explanation"]
+        "properties": {"explaination": {"type": "string"}},
+        "required": ["explaination"]
     }
 }
 _EXPLAIN_OVERALL_SYS = (
@@ -83,15 +84,15 @@ _EXPLAIN_OVERALL_SYS = (
 )
 
 def explain_overall_recommendation(messages_logs: dict) -> str:
-    # Generate an explanation for the overall recommendation
+    # Generate an explaination for the overall recommendation
     # Convert dictionary to JSON string for AI analysis
     content = json.dumps(messages_logs, ensure_ascii=False)
     
     try:
         out = _so_overall(content, _EXPLAIN_OVERALL_SYS, _EXPLAIN_OVERALL_SCHEMA)    
-        message = out.get("explanation", "Sorry, I couldn't summarize my filter process, but here are some great books for you!")
+        message = out.get("explaination", "Sorry, I couldn't summarize my filter process, but here are some great books for you!")
     except Exception as e:
-        print(f"Error generating explanation: {e}")
+        print(f"Error generating explaination: {e}")
         message = "Sorry, I had trouble summarizing the filter process."
 
     return message[:_MAX_CHAR]
@@ -104,7 +105,7 @@ def explain_overall_recommendation(messages_logs: dict) -> str:
 _EXPLAIN_NO_BOOKS_SYS = (
     "You are a warm, supportive book recommendation assistant who helps users adjust their search when no books are found.\n\n"
     
-    "TASK: Write a short, encouraging explanation when no books matched the user's filters.\n\n"
+    "TASK: Write a short, encouraging explaination when no books matched the user's filters.\n\n"
     
     "INPUT FORMAT:\n"
     "{'applied_author': 'Applied authors=[...]: narrowed X → Y books.', 'applied_genre': '...', etc.}\n\n"
@@ -129,15 +130,15 @@ _EXPLAIN_NO_BOOKS_SYS = (
 )
 
 def explain_no_books_found(messages_logs: dict) -> str:
-    # Generate an explanation for why there are no books
+    # Generate an explaination for why there are no books
     # Convert dictionary to JSON string for AI analysis
     content = json.dumps(messages_logs, ensure_ascii=False)
     
     try:
         out = _so_overall(content, _EXPLAIN_NO_BOOKS_SYS, _EXPLAIN_OVERALL_SCHEMA)            
-        message = out.get("explanation", "Sorry, I couldn't summarize my filter process, but here are some great books for you!")
+        message = out.get("explaination", "Sorry, I couldn't summarize my filter process, but here are some great books for you!")
     except Exception as e:
-        print(f"Error generating explanation: {e}")
+        print(f"Error generating explaination: {e}")
         message = "Sorry, I had trouble summarizing the filter process."
 
     return message[:_MAX_CHAR]
@@ -179,9 +180,29 @@ def explain_no_filter_applied(user_query: str) -> str:
     # Generate a friendly introduction for book recommendations
     try:
         out = _so_overall(user_query, _EXPLAIN_NO_FILTERS, _EXPLAIN_OVERALL_SCHEMA)
-        message = out.get("explanation", "Here are some great books based on your request!")
+        message = out.get("explaination", "Here are some great books based on your request!")
     except Exception as e:
         print(f"Error generating introduction: {e}")
         message = "Here are some wonderful books I found for you!"
+
+    return message[:_MAX_CHAR]
+
+# -----------------------------------------------------------------------------
+
+_EXPLAIN_BOOK_RECOMMENDATION = (
+    "You are a friendly and enthusiastic book recommendation assistant.\n\n"
+    
+)
+
+def explain_book_recommendation(book: BookRecommendation, filters: FilterSchema, content: str) -> str:
+    # Generate an explaination for the book recommendation
+    payload = {**book.dict(), **filters.dict()}
+
+    try:
+        out = _so_overall(payload, _EXPLAIN_BOOK_RECOMMENDATION, _EXPLAIN_OVERALL_SCHEMA, content)
+        message = out.get("explaination", "Here’s a great book I found for you!")
+    except Exception as e:
+        print(f"Error generating book explaination: {e}")
+        message = "I had trouble explaining the book recommendation."
 
     return message[:_MAX_CHAR]
