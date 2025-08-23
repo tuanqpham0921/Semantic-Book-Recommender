@@ -79,29 +79,6 @@ def is_valid_query(query: str) -> bool:
     if profanity.contains_profanity(query):
         return False
     
-    
-    # TODO add the more strict check tier later
-    #      can return things like might be problematic
-    # OpenAI moderation check
-    # try:
-    #     moderation = client.moderations.create(
-    #         model="omni-moderation-latest",
-    #         input=query.strip()
-    #     )
-
-    #     print("-------------------------------")
-    #     print(f"Moderation response: {moderation}")
-    #     print("-------------------------------")
-    #     print(moderation.results[0].flagged)
-    #     print("-------------------------------")
-    #     print("-------------------------------")
-
-    #     if moderation.results[0].flagged:
-    #         return False
-    # except Exception as e:
-    #     print(f"Error in moderation check: {e}")
-    #     # Continue to AI validation if moderation fails
-    
     # less strict check
     try:
         result = _so(query.strip(), _VALIDATION_SYS, _VALIDATION_SCHEMA)
