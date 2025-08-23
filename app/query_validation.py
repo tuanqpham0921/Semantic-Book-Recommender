@@ -44,19 +44,26 @@ _VALIDATION_SCHEMA = {
 _VALIDATION_SYS = (
     "You are a content validator for a book recommendation system.\n\n"
     
-    "Analyze the user's query and return is_valid: true ONLY if ALL of these are met:\n"
-    "1. Written in English (or mostly English)\n"
-    "2. Contains no profanity, offensive language, or inappropriate content\n"
-    "3. Makes basic sense as a book search request\n"
-    "4. Not spam, gibberish, or meaningless text\n\n"
+    "Analyze the user's query and return is_valid: true if it could reasonably be a book search request.\n\n"
     
-    "Return is_valid: false for:\n"
-    "- Non-English text\n"
-    "- Any profanity or offensive content\n"
-    "- Nonsensical gibberish\n"
-    "- Spam or inappropriate requests\n\n"
+    "ACCEPT queries that:\n"
+    "1. Are written in English (or mostly English)\n"
+    "2. Contain book-related terms like genres (horror, romance, sci-fi, mystery, etc.)\n"
+    "3. Include descriptive words commonly used for books (scary, funny, sad, exciting, dark, romantic, etc.)\n"
+    "4. Mention authors, titles, topics, or book characteristics\n"
+    "5. Have filters like page count, publication year, etc.\n"
+    "6. Make basic sense as a book search request\n"
+    "7. Are single words that could describe books (e.g., 'scary', 'romantic', 'thriller')\n\n"
     
-    "Be strict - when in doubt, return false."
+    "REJECT queries that are:\n"
+    "- Completely non-English text\n"
+    "- Random gibberish or keyboard mashing (e.g., 'asdfghjkl', 'qwerty uiop')\n"
+    "- Just numbers or punctuation with no book context\n"
+    "- Spam, URLs, or promotional content unrelated to books\n"
+    "- Code snippets or technical jargon unrelated to books\n"
+    "- Profanity or offensive content\n\n"
+    
+    "Be permissive for book-related content - single descriptive words like 'scary', 'funny', 'romantic' are valid book searches."
 )
 
 def is_valid_query(query: str) -> bool:
@@ -72,18 +79,30 @@ def is_valid_query(query: str) -> bool:
     if profanity.contains_profanity(query):
         return False
     
-    # OpenAI moderation check
-    try:
-        moderation = client.moderations.create(
-            model="omni-moderation-latest",
-            input=query.strip()
-        )
-        if moderation.results[0].flagged:
-            return False
-    except Exception as e:
-        print(f"Error in moderation check: {e}")
-        # Continue to AI validation if moderation fails
     
+    # TODO add the more strict check tier later
+    #      can return things like might be problematic
+    # OpenAI moderation check
+    # try:
+    #     moderation = client.moderations.create(
+    #         model="omni-moderation-latest",
+    #         input=query.strip()
+    #     )
+
+    #     print("-------------------------------")
+    #     print(f"Moderation response: {moderation}")
+    #     print("-------------------------------")
+    #     print(moderation.results[0].flagged)
+    #     print("-------------------------------")
+    #     print("-------------------------------")
+
+    #     if moderation.results[0].flagged:
+    #         return False
+    # except Exception as e:
+    #     print(f"Error in moderation check: {e}")
+    #     # Continue to AI validation if moderation fails
+    
+    # less strict check
     try:
         result = _so(query.strip(), _VALIDATION_SYS, _VALIDATION_SCHEMA)
         return result.get("is_valid", False)
