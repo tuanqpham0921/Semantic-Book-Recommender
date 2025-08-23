@@ -1,7 +1,6 @@
 
 import json
-import re
-from typing import Optional, Dict, Any, List
+from typing import Dict, Any, List
 
 from app.config import client, MODEL
 from better_profanity import profanity

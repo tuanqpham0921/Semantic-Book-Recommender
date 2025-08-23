@@ -3,7 +3,6 @@ import re
 from typing import Optional, Dict, Any, List
 
 from app.config import client, MODEL
-from app.query_validation import remove_keywords_duplicates
 
 filter_categories = ["tone", "pages_max", "pages_min", "genre", "children", "keywords"]
 # Add published_year_exact to filter categories
