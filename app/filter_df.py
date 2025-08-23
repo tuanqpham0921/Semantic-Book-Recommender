@@ -31,17 +31,26 @@ def apply_pre_filters(books: pd.DataFrame, filters: dict, filterValidation: dict
         validate_author_filter(books, authors, filterValidation, len_books_before)
 
     # get the Fiction/Nonfiction genre first
+    genre = "Children's" if "children" in filters and filters["children"] else ""
     if "genre" in filters and filters["genre"] in ["Fiction", "Nonfiction"]:
         logger.info("APPLYING genre filter")
-        genre = filters["genre"]
-        if "children" in filters and filters["children"]:
-            genre = "Children's " + genre
+        genre = genre + " " + filters["genre"]
         
         len_books_before = len(books)
         books = books[books["simple_categories"] == genre]
 
         # now we validate genre filtering
         validate_genre_filter(books, genre, filterValidation, len_books_before)
+    elif genre == "Children's":
+        # Special case for Children's genre - should include both Fiction and Nonfiction
+        logger.info("APPLYING Children's (Fiction and Nonfiction) genre filter")
+        
+        len_books_before = len(books)
+        # Use OR condition to include both Children's Fiction AND Children's Nonfiction
+        children_mask = (books["simple_categories"] == "Children's Fiction") | (books["simple_categories"] == "Children's Nonfiction")
+        books = books[children_mask]
+
+        validate_genre_filter(books, "Children's Fiction and Nonfiction", filterValidation, len_books_before)
 
     # min and max filter is last
     if "pages_min" in filters and filters["pages_min"] is not None:

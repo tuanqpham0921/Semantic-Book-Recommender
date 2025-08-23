@@ -120,6 +120,31 @@ def test_apply_pre_filters_children_non_fiction(sample_books):
     assert result.iloc[0]['title'] == 'National Geographic Kids Almanac 2023'
 
 
+def test_apply_pre_filters_children_only_returns_both_types(sample_books):
+    """Test the bug fix: children=True with no genre should return both Fiction and Nonfiction"""
+    filters = {'children': True}  # Only children flag, no genre
+    filterValidation = {}
+    result = apply_pre_filters(sample_books, filters, filterValidation)
+    
+    # Should get ALL children's books (both Fiction and Nonfiction)
+    expected_count = 4  # 3 Children's Fiction + 1 Children's Nonfiction
+    assert len(result) == expected_count
+    
+    # Should include both Children's Fiction and Children's Nonfiction
+    categories = set(result['simple_categories'].tolist())
+    expected_categories = {"Children's Fiction", "Children's Nonfiction"}
+    assert categories == expected_categories
+    
+    # Verify specific children's books are included
+    titles = set(result['title'].tolist())
+    expected_titles = {
+        "Harry Potter and the Sorcerer's Stone",
+        "Harry Potter and the Chamber of Secrets", 
+        "Charlie and the Chocolate Factory",
+        "National Geographic Kids Almanac 2023"
+    }
+    assert titles == expected_titles
+
 # ============================================================================
 # RERANK_BOOKS_BY_KEYWORDS_AND_TONE TESTS
 # ============================================================================
