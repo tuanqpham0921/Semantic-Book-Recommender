@@ -93,7 +93,7 @@ class TestFilterQueryMocked:
     def test_extract_authors_with_mock(self, mock_client):
         """Test author extraction logic"""
         mock_response = MagicMock()
-        mock_response.choices[0].message.content = '{"keywords": ["J.K. Rowling", "Stephen King"]}'
+        mock_response.choices[0].message.content = '{"names": ["J.K. Rowling", "Stephen King"]}'
         mock_client.chat.completions.create.return_value = mock_response
         
         result = extract_authors("Books by J.K. Rowling and Stephen King")
