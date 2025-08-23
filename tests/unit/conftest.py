@@ -28,7 +28,7 @@ def sample_books():
             'num_pages': 200,
             'published_year': 1949,
             'description': 'A dystopian novel about a totalitarian regime that controls every aspect of life through surveillance and propaganda.',
-            'joy': 0.1, 'surprise': 0.2, 'anger': 0.4, 'fear': 0.8, 'sadness': 0.7
+            'joy': 0.1, 'surprise': 0.2, 'anger': 0.4, 'disgust': 0.3, 'fear': 0.8, 'sadness': 0.7
         },
         {
             'isbn13': '9780439708180',
@@ -38,7 +38,7 @@ def sample_books():
             'num_pages': 300,
             'published_year': 1997,
             'description': 'A young wizard discovers his magical heritage on his eleventh birthday and begins his education at Hogwarts School of Witchcraft and Wizardry.',
-            'joy': 0.9, 'surprise': 0.7, 'anger': 0.1, 'fear': 0.2, 'sadness': 0.1
+            'joy': 0.9, 'surprise': 0.7, 'anger': 0.1, 'disgust': 0.05, 'fear': 0.2, 'sadness': 0.1
         },
         {
             'isbn13': '9780385121675',
@@ -48,7 +48,7 @@ def sample_books():
             'num_pages': 400,
             'published_year': 1977,
             'description': 'A horror novel about a writer who becomes winter caretaker at an isolated hotel and descends into madness.',
-            'joy': 0.05, 'surprise': 0.6, 'anger': 0.3, 'fear': 0.95, 'sadness': 0.4
+            'joy': 0.05, 'surprise': 0.6, 'anger': 0.3, 'disgust': 0.4, 'fear': 0.95, 'sadness': 0.4
         },
         {
             'isbn13': '9780062315007',
@@ -58,7 +58,7 @@ def sample_books():
             'num_pages': 250,
             'published_year': 1960,
             'description': 'A classic novel about racial injustice and moral growth in the American South during the 1930s.',
-            'joy': 0.3, 'surprise': 0.4, 'anger': 0.6, 'fear': 0.3, 'sadness': 0.5
+            'joy': 0.3, 'surprise': 0.4, 'anger': 0.6, 'disgust': 0.4, 'fear': 0.3, 'sadness': 0.5
         },
         {
             'isbn13': '9780062059925',
@@ -68,7 +68,7 @@ def sample_books():
             'num_pages': 180,
             'published_year': 2008,
             'description': 'An exploration of what makes high-achievers different and the hidden advantages that contribute to success.',
-            'joy': 0.6, 'surprise': 0.8, 'anger': 0.1, 'fear': 0.1, 'sadness': 0.2
+            'joy': 0.6, 'surprise': 0.8, 'anger': 0.1, 'disgust': 0.05, 'fear': 0.1, 'sadness': 0.2
         },
         {
             'isbn13': '9780385737951',
@@ -78,7 +78,7 @@ def sample_books():
             'num_pages': 120,
             'published_year': 1964,
             'description': 'A delightful tale about a poor boy who wins a golden ticket to tour the most magnificent chocolate factory in the world.',
-            'joy': 0.95, 'surprise': 0.9, 'anger': 0.05, 'fear': 0.1, 'sadness': 0.1
+            'joy': 0.95, 'surprise': 0.9, 'anger': 0.05, 'disgust': 0.02, 'fear': 0.1, 'sadness': 0.1
         },
         {
             'isbn13': '9780439136365',
@@ -88,7 +88,7 @@ def sample_books():
             'num_pages': 80,
             'published_year': 2022,
             'description': 'An educational almanac packed with facts, photos, and fun activities about animals, science, geography, and world cultures.',
-            'joy': 0.7, 'surprise': 0.5, 'anger': 0.05, 'fear': 0.05, 'sadness': 0.1
+            'joy': 0.7, 'surprise': 0.5, 'anger': 0.05, 'disgust': 0.02, 'fear': 0.05, 'sadness': 0.1
         },
         {
             'isbn13': '9780544173767',
@@ -98,7 +98,7 @@ def sample_books():
             'num_pages': 350,
             'published_year': 2003,
             'description': 'A fascinating journey through science and history, explaining complex scientific concepts in an accessible and entertaining way.',
-            'joy': 0.5, 'surprise': 0.6, 'anger': 0.1, 'fear': 0.1, 'sadness': 0.2
+            'joy': 0.5, 'surprise': 0.6, 'anger': 0.1, 'disgust': 0.05, 'fear': 0.1, 'sadness': 0.2
         },
         {
             'isbn13': '9780307743657',
@@ -108,7 +108,7 @@ def sample_books():
             'num_pages': 1138,
             'published_year': 1986,
             'description': 'A terrifying horror novel about a group of children who face an ancient evil entity in the town of Derry, Maine.',
-            'joy': 0.02, 'surprise': 0.8, 'anger': 0.4, 'fear': 0.98, 'sadness': 0.6
+            'joy': 0.02, 'surprise': 0.8, 'anger': 0.4, 'disgust': 0.5, 'fear': 0.98, 'sadness': 0.6
         },
         {
             'isbn13': '9780345444462',
@@ -118,7 +118,7 @@ def sample_books():
             'num_pages': 645,
             'published_year': 1984,
             'description': 'A fantasy adventure about a twelve-year-old boy who travels between parallel worlds to save his dying mother.',
-            'joy': 0.4, 'surprise': 0.7, 'anger': 0.2, 'fear': 0.6, 'sadness': 0.3
+            'joy': 0.4, 'surprise': 0.7, 'anger': 0.2, 'disgust': 0.1, 'fear': 0.6, 'sadness': 0.3
         },
         {
             'isbn13': '9780439064873',
@@ -128,7 +128,7 @@ def sample_books():
             'num_pages': 341,
             'published_year': 1998,
             'description': 'Harry returns to Hogwarts for his second year and faces the mystery of the Chamber of Secrets and its deadly monster.',
-            'joy': 0.7, 'surprise': 0.8, 'anger': 0.2, 'fear': 0.4, 'sadness': 0.2
+            'joy': 0.7, 'surprise': 0.8, 'anger': 0.2, 'disgust': 0.1, 'fear': 0.4, 'sadness': 0.2
         }
     ]
     
