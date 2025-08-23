@@ -22,21 +22,21 @@ filters_names = ["genre", "author", "pages_min", "pages_max", "tone", "children"
 #===================================================================
 
 def print_result(result, query):
-    print("=" * 110)
+    print("=" * 119)
     print("QUERY: \n")
     print(query)
 
     # -------------------------------------------------
-    print("=" * 110)
+    print("=" * 119)
     # Print wider header row
     print(
-        f"{'Title'[:60].ljust(62)}"
-        f"{'Rank Score'.ljust(6)}"
+        f"{'Title'[:60].ljust(65)}"
+        f"{'Rank Score'.ljust(15)}"
         f"{'Authors'[:30].ljust(32)}"
         f"{'Genre'[:25].ljust(27)}"
         f"{'Num Pages'.rjust(10)}"
     )
-    print("-" * 110)
+    print("-" * 119)
 
     for i, book in enumerate(result, 1):
         # Safely get values with fallbacks
@@ -48,13 +48,13 @@ def print_result(result, query):
     
         
         print(
-            f"{str(title)[:60].ljust(62)}"
-            f"{str(rerank_score).ljust(6)}"
+            f"{str(title)[:60].ljust(65)}"
+            f"{f'{rerank_score:.2f}'.ljust(15)}"
             f"{str(authors)[:30].ljust(32)}"
             f"{str(categories)[:25].ljust(27)}"
             f"{str(num_pages).rjust(10)}"
         )
-    print("=" * 110)
+    print("=" * 119)
 
     # Print all unique authors (one-liner)
     authors_set = set()
@@ -188,21 +188,21 @@ def print_difference_reasoning(actual, expected):
     # Remove null values from actual filters
     actual_cleaned = {}
     actual_cleaned["content"] = actual["content"]
-    actual_cleaned["filters"] = None
+    actual_cleaned["filters"] = {}
 
     if actual.get("filters"):
         for k, v in actual["filters"].items():
-            if not v: continue
+            if not v or not k: continue
 
             if k == "published_year":
                 if v.get("min") is not None:
-                    actual_cleaned["published_year_min"] = v["min"]
+                    actual_cleaned["filters"]["published_year_min"] = v["min"]
                 if v.get("max") is not None:
-                    actual_cleaned["published_year_max"] = v["max"]
+                    actual_cleaned["filters"]["published_year_max"] = v["max"]
                 if v.get("exact") is not None:
-                    actual_cleaned["published_year_exact"] = v["exact"]
+                    actual_cleaned["filters"]["published_year_exact"] = v["exact"]
             else:
-                actual_cleaned[k] = v
+                actual_cleaned["filters"][k] = v
 
     print("DIFFERENCE REASONING:")
     print("Actual:")
