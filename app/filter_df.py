@@ -4,7 +4,6 @@ import logging
 from app.filter_validation import (
     validate_author_filter, validate_genre_filter,
     validate_min_pages_filter, validate_max_pages_filter,
-    validate_keywords_filter, validate_tone_filter,
     validate_published_year_filter
 )
 
