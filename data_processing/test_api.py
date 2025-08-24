@@ -1,10 +1,16 @@
-import requests
 import sys
+import os
+
+# Add the project root to the Python path to allow for module imports
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import requests
 import json
 import textwrap
 import argparse
-import os
 from datetime import datetime
+
+from app.models import BookRecommendation, FilterSchema
 
 url = "http://localhost:8000/"
 recommend_books_url = f"{url}recommend_books"
@@ -255,8 +261,24 @@ def get_overall_explaination(recommendation_response):
     return result
 
 
-def get_book_recommendations(query: str, payload: dict, reasoning: dict) -> dict:
+def get_book_recommendations(book, reasoning) -> dict:
     # Call the book recommendation API with the provided query and payload
+    
+    
+    # Convert book to dict, not JSON string
+    book_dict = BookRecommendation(**book).dict()
+
+    filters = reasoning.get("filters", {})
+    # Convert filters to dict, not JSON string  
+    filters_dict = FilterSchema(**filters).dict() if filters else None
+    content = reasoning.get("content", "")
+
+    payload = {
+        "book": book_dict,
+        "filters": filters_dict,
+        "content": content
+    }
+
     response = requests.post(explain_book_recommendation_url, json=payload, headers=headers)
 
     if not response.ok:
@@ -264,7 +286,24 @@ def get_book_recommendations(query: str, payload: dict, reasoning: dict) -> dict
         return {"books": []}
 
     result = response.json()
+
+    # print("****RESULT")
+    # print(result["explain_book_recommendation"])
+    # print("************************************")
+
     return result
+
+def print_book_explaination(book_explanation, book_title):
+
+
+    print("-" * 110)
+    print(f"BOOK EXPLAINATION FOR: {book_title}")
+
+    if 'explain_book_recommendation' not in book_explanation:
+        print("No explanation found.")
+    else:
+        print(f"{book_explanation['explain_book_recommendation']}")
+    print("-" * 110)
 
 #================================================
 #================================================
@@ -308,9 +347,15 @@ def batch_test():
             print("=" * 110)
             print(f"PROCESSING QUERY: \n{item['query']}")
             print_explaination(overall_explaination)
-
+            
             print("-" * 110)
-    
+            print_book_explaination(overall_explaination, item['query'])
+
+            print("GETTING BOOK RECOMMENDATIONS:")
+            for book in recomendation_response["recommendations"][:3]:
+                book_explaination = get_book_recommendations(book, reasoning)
+                print_book_explaination(book_explaination, book["title"])
+
     # Restore stdout
     sys.stdout = original_stdout
     print(f"Batch test completed. Results saved to: {log_file}")
@@ -320,7 +365,7 @@ def batch_test():
 #================================================
 
 def single_test():
-    query = "a book about love"
+    query = "a book about love with more than 300 pages"
 
     payload = {"description": query}
     
@@ -338,9 +383,11 @@ def single_test():
     overall_explaination = get_overall_explaination(recomendation_response)
     print_explaination(overall_explaination)
 
-    for book in recomendation_response["books"][:3]:
-        book_explaination = get_book_recommendations(book, reasoning.filters, reasoning, content)
-        print(f"BOOK EXPLAINATION: \n{book_explaination}\n")
+    print("GETTING BOOK RECOMMENDATIONS:")
+    for book in recomendation_response["recommendations"][:3]:
+        book_explaination = get_book_recommendations(book, reasoning)
+        print_book_explaination(book_explaination, book["title"])
+        # print(f"BOOK EXPLAINATION: \n{book_explaination}\n")
 
 
 #================================================

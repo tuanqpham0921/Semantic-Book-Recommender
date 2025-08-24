@@ -1,4 +1,9 @@
 import json
+import logging
+
+# Get the logger (same configuration as main.py)
+logger = logging.getLogger(__name__)
+
 from app.models import (
     BookRecommendationResponse, BookRecommendation,
     FilterSchema
@@ -291,17 +296,27 @@ _EXPLAIN_BOOK_RECOMMENDATION = (
 
 def explain_book_recommendation(book: BookRecommendation, filters: FilterSchema, content: str) -> str:
     # Generate an explaination for the book recommendation
+    logger.info(f"*** in explain_book_recommendation")
     messages = get_book_filter_messages(book, filters)
 
+    logger.info(f"*** Finished get_book_filter_messages")
+    logger.info(f"Messages: {messages}")
+    logger.info(f"=======================================")
+
+    # TODO: Need to make sure that even tho there are no messages
+    # we still provide a meaningful explanation, because of the similarity search
+    # we recommended for a reason. We can provide generic explanations. or use messages as extra
     if not messages:
-        message = f"Sorry, I had trouble explaining why I recommended this {book.title}"
+        message = f"Sorry, there's no messages for {book.title}"
         return message
 
+    logger.info(f"*** QUERYing _so_overall")
     try:
         out = _so_overall(messages, _EXPLAIN_BOOK_RECOMMENDATION, _EXPLAIN_OVERALL_SCHEMA, content)
-        message = out.get("explaination", f"Sorry, I had trouble explaining why I recommended this {book.title}")
+        message = out.get("explaination", f"Sorry, I had trouble explaining why I recommended this {book.title}. But this is a good match for you")
     except Exception as e:
         print(f"Error generating book explaination: {e}")
-        message = f"Sorry, I had trouble explaining why I recommended this {book.title}"
+        message = f"Sorry, I had trouble explaining why I recommended this {book.title}. There was an error when getting the book explanation"
 
+    logger.info(f"*** Finished explain_book_recommendation")
     return message[:_MAX_CHAR]
