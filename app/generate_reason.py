@@ -189,6 +189,60 @@ def explain_no_filter_applied(user_query: str) -> str:
 
 # -----------------------------------------------------------------------------
 
+def get_book_filter_messages(book: BookRecommendation, filters: FilterSchema) -> dict:
+    result = {}
+
+    if filters.author and book.authors:
+        book_authors_lower = book.authors.lower()
+        # Check if any of the filter authors match the book's authors
+        matching_authors = [author for author in filters.author if author.lower() in book_authors_lower]
+        if matching_authors:
+            result["matched_author"] = f"The book is by {book.authors}, which matches your author filter for {', '.join(matching_authors)}."
+
+    if filters.pages_min and book.num_pages and book.num_pages >= filters.pages_min:
+        result["matched_min_pages"] = f"The book has {book.num_pages} pages, which meets your minimum page count filter of {filters.pages_min}."
+
+    if filters.pages_max and book.num_pages and book.num_pages <= filters.pages_max:
+        result["matched_max_pages"] = f"The book has {book.num_pages} pages, which meets your maximum page count filter of {filters.pages_max}."
+
+    if filters.published_year and book.published_year:
+        if filters.published_year.get("min") and book.published_year >= filters.published_year["min"]:
+            result["matched_min_published_year"] = f"The book was published in {book.published_year}, which meets your minimum published year filter of {filters.published_year['min']}."
+        if filters.published_year.get("max") and book.published_year <= filters.published_year["max"]:
+            result["matched_max_published_year"] = f"The book was published in {book.published_year}, which meets your maximum published year filter of {filters.published_year['max']}."
+        if filters.published_year.get("exact") and filters.published_year["exact"] == book.published_year:
+            result["matched_exact_published_year"] = f"The book was published in {book.published_year}, which exactly matches your published year filter of {filters.published_year['exact']}."
+
+    genre = ""
+    if filters.children:
+        genre = "Children's "
+        result["matched_children"] = "You requested Children's books."
+
+    if filters.genre and filters.genre in ["Fiction", "Nonfiction"]:
+        genre = [genre + filters.genre]
+    else:
+        genre = ["Children's Fiction", "Children's Nonfiction"]
+
+    if book.simple_categories and book.simple_categories in genre:
+        result["matched_genre_categories"] = f"The book belongs to the {book.simple_categories} category(ies), which matches your genre {', '.join(genre)}."
+
+    if filters.keywords and book.description:
+        matching_keywords = [kw for kw in filters.keywords if kw.lower() in book.description.lower()]
+        if matching_keywords:
+            result["matched_keywords"] = f"The book's description matches your keywords: {', '.join(matching_keywords)}."
+
+    if filters.keywords and book.title:
+        matching_title = [kw for kw in filters.keywords if kw.lower() in book.title.lower()]
+        if matching_title:
+            result["matched_title"] = f"The book's title matches your keywords: {', '.join(matching_title)}."
+
+    if filters.tone:
+        tone_score = getattr(book, filters.tone, None)
+        if tone_score:
+            result["matched_tone"] = f"The book has a {filters.tone} tone score of {str(tone_score)[:5]} out of 1.0"
+
+    return result
+
 _EXPLAIN_BOOK_RECOMMENDATION = (
     "You are a friendly and enthusiastic book recommendation assistant.\n\n"
     
@@ -196,13 +250,13 @@ _EXPLAIN_BOOK_RECOMMENDATION = (
 
 def explain_book_recommendation(book: BookRecommendation, filters: FilterSchema, content: str) -> str:
     # Generate an explaination for the book recommendation
-    payload = {**book.dict(), **filters.dict()}
+    messages = get_book_filter_messages(book, filters)
 
     try:
-        out = _so_overall(payload, _EXPLAIN_BOOK_RECOMMENDATION, _EXPLAIN_OVERALL_SCHEMA, content)
-        message = out.get("explaination", "Here’s a great book I found for you!")
+        out = _so_overall(messages, _EXPLAIN_BOOK_RECOMMENDATION, _EXPLAIN_OVERALL_SCHEMA, content)
+        message = out.get("explaination", f"Sorry, I had trouble explaining why I recommended this {book.title}")
     except Exception as e:
         print(f"Error generating book explaination: {e}")
-        message = "I had trouble explaining the book recommendation."
+        message = f"Sorry, I had trouble explaining why I recommended this {book.title}"
 
     return message[:_MAX_CHAR]
