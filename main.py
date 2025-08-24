@@ -38,11 +38,28 @@ SIMILAR_K = 50
 FINAL_K   = 10
 DEBUG_K   = 5
 
+MIN_QUERY_LENGTH = 5
+MAX_QUERY_LENGTH = 150
+
 def logger_separator():
     logger.info("\n" + "="*50 + "\n")
 
 @app.post("/reason_query", response_model=ReasoningResponse)
 def reason_query_endpoint(request: QueryRequest):
+    if len(request.description) < MIN_QUERY_LENGTH:
+        return ReasoningResponse(
+            content= f"Query description is too short under {MIN_QUERY_LENGTH} characters.",
+            filters={},
+            is_valid=False
+        )
+    
+    if len(request.description) > MAX_QUERY_LENGTH:
+        return ReasoningResponse(
+            content= f"Query description is too long over {MAX_QUERY_LENGTH} characters.",
+            filters={},
+            is_valid=False
+        )
+
     if not is_valid_query(request.description):
         return ReasoningResponse(
             content="Invalid query, Please try again",
