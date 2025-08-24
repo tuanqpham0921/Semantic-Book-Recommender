@@ -72,19 +72,22 @@ def is_valid_query(query: str) -> bool:
     Returns: True if valid, False if invalid
     """
     if not query or not query.strip():
+        print("**** EMPTY QUERY *****")
         return False
     
     # Quick profanity check first
     if profanity.contains_profanity(query):
+        print("**** CONTAINS profanity *****")
         return False
     
-    # less strict check
-    try:
-        result = _so(query.strip(), _VALIDATION_SYS, _VALIDATION_SCHEMA)
-        return result.get("is_valid", False)
-    except Exception as e:
-        print(f"Error validating query: {e}")
-        return False
+    return True
+    # # less strict check
+    # try:
+    #     result = _so(query.strip(), _VALIDATION_SYS, _VALIDATION_SCHEMA)
+    #     return result.get("is_valid", False)
+    # except Exception as e:
+    #     print(f"Error validating query: {e}")
+    #     return False
     
 
 def remove_keywords_duplicates(keywords: List[str], filters: Dict[str, Any]):
