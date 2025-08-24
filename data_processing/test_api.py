@@ -276,6 +276,12 @@ def batch_test():
             print(f"ID: {item['id']}")
             reasoning = get_reasoning(item["query"], payload)
 
+            if reasoning["is_valid"] is False:
+                print("INVALID QUERY:")
+                print(f"     {reasoning['content']}")
+                print("=" * 110)
+                return
+
             expected_reasoning = item["expected"]
             print_difference_reasoning(reasoning, expected_reasoning)
 
@@ -296,12 +302,18 @@ def batch_test():
 #================================================
 #================================================
 def single_test():
-    query = "a book that's 1 page long"
+    query = "asdfjkl qweruiop zxcvbnm"
 
     payload = {"description": query}
     
     reasoning = get_reasoning(query, payload)
     print(f"REASONING: \n{json.dumps(reasoning, indent=2)}\n")
+
+    if reasoning["is_valid"] is False:
+        print("INVALID QUERY:")
+        print(f"     {reasoning['content']}")
+        print("=" * 110)
+        return
 
     recomendation_response = process_query(query, payload, reasoning)
 
