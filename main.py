@@ -16,7 +16,7 @@ from app.config import add_cors_middleware, db_books, BOOKS_PATH
 import app.filter_query as filter_query
 import app.filter_df as filter_df
 from app.search import similarity_search_filtered
-import app.generate_reason as generate_reason, explain_book_recommendation
+import app.generate_reason as generate_reason
 from app.query_validation import is_valid_query
 
 # Configure middleware
