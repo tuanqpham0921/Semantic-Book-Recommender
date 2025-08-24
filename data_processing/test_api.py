@@ -10,6 +10,7 @@ url = "http://localhost:8000/"
 recommend_books_url = f"{url}recommend_books"
 reason_query_url    = f"{url}reason_query"
 explain_overall_recommendation_url = f"{url}explain_overall_recommendation"
+explain_book_recommendation_url    = f"{url}explain_book_recommendation"
 
 headers = {"Content-Type": "application/json"}
 prompts = [
@@ -254,6 +255,21 @@ def get_overall_explaination(recommendation_response):
     return result
 
 
+def get_book_recommendations(query: str, payload: dict, reasoning: dict) -> dict:
+    # Call the book recommendation API with the provided query and payload
+    response = requests.post(explain_book_recommendation_url, json=payload, headers=headers)
+
+    if not response.ok:
+        print(f"Error {response.status_code}: {response.text}")
+        return {"books": []}
+
+    result = response.json()
+    return result
+
+#================================================
+#================================================
+#================================================
+
 def batch_test():
     # Create logs directory if it doesn't exist
     os.makedirs("batch_test_logs", exist_ok=True)
@@ -301,8 +317,10 @@ def batch_test():
 
 #================================================
 #================================================
+#================================================
+
 def single_test():
-    query = "asdfjkl qweruiop zxcvbnm"
+    query = "a book about love"
 
     payload = {"description": query}
     
@@ -320,6 +338,9 @@ def single_test():
     overall_explaination = get_overall_explaination(recomendation_response)
     print_explaination(overall_explaination)
 
+    for book in recomendation_response["books"][:3]:
+        book_explaination = get_book_recommendations(book, reasoning.filters, reasoning, content)
+        print(f"BOOK EXPLAINATION: \n{book_explaination}\n")
 
 
 #================================================
