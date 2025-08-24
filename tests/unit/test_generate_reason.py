@@ -307,3 +307,17 @@ class TestGetBookFilterMessages:
         assert "matched_genre_categories" in result
         assert "matched_keywords" in result
         assert "matched_tone" in result
+
+    def test_children_filter_no_genre(self, sample_books):
+        """Test children's filter without a specific genre, matching both fiction and nonfiction."""
+        book_data = sample_books.iloc[1].to_dict()  # Harry Potter, a Children's Fiction book
+        book = BookRecommendation(**book_data)
+        filters = FilterSchema(children=True)  # No genre specified
+        result = get_book_filter_messages(book, filters)
+
+        assert "matched_children" in result
+        assert "matched_genre_categories" in result
+        assert result["matched_children"] == "You requested Children's books."
+        
+        expected_genres = "Children's Fiction, Children's Nonfiction"
+        assert result["matched_genre_categories"] == f"The book belongs to the {book.simple_categories} category(ies), which matches your genre {expected_genres}."
