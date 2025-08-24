@@ -190,6 +190,20 @@ def explain_no_filter_applied(user_query: str) -> str:
 # -----------------------------------------------------------------------------
 
 def get_book_filter_messages(book: BookRecommendation, filters: FilterSchema) -> dict:
+    """
+    Generates messages for a single book based on how it matches the provided filters.
+
+    This function checks a book against various filter criteria (author, pages, year, etc.)
+    and creates a dictionary of human-readable strings for each criterion that matches.
+
+    Args:
+        book: The book object to be evaluated.
+        filters: The schema containing all active filter criteria.
+
+    Returns:
+        A dictionary where each key is a matched filter (e.g., 'matched_author')
+        and the value is a string explaining why the book matched that filter.
+    """
     result = {}
 
     if filters.author and book.authors:
@@ -246,11 +260,42 @@ def get_book_filter_messages(book: BookRecommendation, filters: FilterSchema) ->
 _EXPLAIN_BOOK_RECOMMENDATION = (
     "You are a friendly and enthusiastic book recommendation assistant.\n\n"
     
+    "TASK: Write a short, engaging summary explaining why a specific book is a great match for the user.\n\n"
+    
+    "INPUT FORMAT:\n"
+    "A dictionary of reasons the book matched, like:\n"
+    "{'matched_author': 'Book is by an author you like.', 'matched_keywords': 'Description matches keywords.', 'matched_tone': 'Book has the right tone.'}\n\n"
+    
+    "CONTEXT:\n"
+    "The user's original query will also be provided for additional context.\n\n"
+
+    "INSTRUCTIONS:\n"
+    "1. Weave the reasons from the input dictionary into a natural, conversational sentence.\n"
+    "2. Use a warm, positive, and encouraging tone. Make it sound like a personal recommendation.\n"
+    "3. Highlight 1-2 of the most important matching points (like author, keywords, or tone).\n"
+    "4. Keep it concise and exciting – aim for 1-2 sentences.\n"
+    "5. Start by saying why this specific book is a great choice.\n\n"
+
+    "EXAMPLE OUTPUTS:\n"
+    "- 'I think you’ll really enjoy this one! It’s a perfect fit for the genre you were looking for and has that adventurous tone you wanted.'\n"
+    "- 'This seems like just the book for you! It’s by an author you were interested in and the story hits on several of your keywords.'\n"
+    "- 'Based on your request, this is a fantastic match. It has the perfect page count and the uplifting, hopeful feel you asked for.'\n\n"
+
+    "AVOID:\n"
+    "- Simply listing the reasons from the dictionary (e.g., 'Matched author. Matched keywords.').\n"
+    "- Sounding robotic or like a system log.\n"
+    "- Being generic. Connect directly to the user's known preferences.\n\n"
+    
+    "GOAL: Make the user feel like this book was hand-picked just for them, building excitement and trust in the recommendation."
 )
 
 def explain_book_recommendation(book: BookRecommendation, filters: FilterSchema, content: str) -> str:
     # Generate an explaination for the book recommendation
     messages = get_book_filter_messages(book, filters)
+
+    if not messages:
+        message = f"Sorry, I had trouble explaining why I recommended this {book.title}"
+        return message
 
     try:
         out = _so_overall(messages, _EXPLAIN_BOOK_RECOMMENDATION, _EXPLAIN_OVERALL_SCHEMA, content)
