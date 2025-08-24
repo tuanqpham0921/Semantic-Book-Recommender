@@ -750,5 +750,60 @@
             "pages_min": 300
          }
       }
+   },
+   {
+      "id": 66,
+      "query": "A book with less than 1 page",
+      "description": "unreasonable filter (pages_max)",
+      "expected": {
+         "content": "a book",
+         "filters": {
+            "pages_max": 1
+         }
+      }
+   },
+   {
+      "id": 67,
+      "query": "A book written in the year 9999",
+      "description": "unreasonable filter (published_year_exact)",
+      "expected": {
+         "content": "a book",
+         "filters": {
+            "published_year_exact": 9999
+         }
+      }
+   },
+   {
+      "id": 68,
+      "query": "asdfjkl qweruiop zxcvbnm",
+      "description": "invalid query (gibberish)",
+      "expected": {
+         "content": "Invalid query, Please try again",
+         "filters": {},
+         "is_valid": false
+      }
+   },
+   {
+      "id": 69,
+      "query": "hi",
+      "description": "invalid query (too short)",
+      "expected": {
+         "content": "Query description is too short.",
+         "filters": {},
+         "is_valid": false
+      }
+   },
+   {
+      "id": 70,
+      "query": "A book by author XyzAbc123",
+      "description": "unreasonable filter (random author)",
+      "expected": {
+         "content": "A book by author XyzAbc123",
+         "filters": {
+            "keywords": [
+               "XyzAbc123"
+            ]
+         }
+      }
    }
 ]

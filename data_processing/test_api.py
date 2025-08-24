@@ -296,7 +296,7 @@ def batch_test():
 #================================================
 #================================================
 def single_test():
-    query = "I want something like The Midnight Library but less depressing"
+    query = "a book that's 1 page long"
 
     payload = {"description": query}
     
