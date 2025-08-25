@@ -5,20 +5,20 @@ import re
 import os
 
 # Load the CSV file into a pandas DataFrame
-books = pd.read_parquet('data/books.parquet')
-print("Column names:")
-print(books.columns.tolist())
-print("=" * 100)
+# books = pd.read_parquet('data/books.parquet')
+# print("Column names:")
+# print(books.columns.tolist())
+# print("=" * 100)
 
 
-# stuff with the thumbnail and picture sizes
+# # stuff with the thumbnail and picture sizes
 
-books["large_thumbnail"] = books["thumbnail"] + "&fife=w800"
-books["large_thumbnail"] = np.where(
-    books["large_thumbnail"].isna(),
-    "data/cover-not-found.jpg",
-    books["large_thumbnail"],
-)
+# books["large_thumbnail"] = books["thumbnail"] + "&fife=w800"
+# books["large_thumbnail"] = np.where(
+#     books["large_thumbnail"].isna(),
+#     "data/cover-not-found.jpg",
+#     books["large_thumbnail"],
+# )
 
 # Save the DataFrame to a new CSV file
 # books.to_csv('data/books_with_emotions_test.csv', index=False)
