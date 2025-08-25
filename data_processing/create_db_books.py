@@ -29,7 +29,7 @@ from langchain_text_splitters import CharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 
-raw_documents = TextLoader(file_path = "tagged_descriptions.txt").load()
+raw_documents = TextLoader(file_path = "data_processing/etc/tagged_descriptions.txt").load()
 seen_line = set()
 documents = []
 
