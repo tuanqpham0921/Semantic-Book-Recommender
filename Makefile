@@ -1,5 +1,5 @@
 # Makefile for Book Recommender API
-.PHONY: help install test test-unit test-integration run dev clean test-api test-api-batch build-docker-dev
+.PHONY: help install test test-unit test-integration run dev clean test-api test-api-batch build-docker-dev build-docker-push-gcp-dev
 
 # Default target
 help:
@@ -54,4 +54,11 @@ clean:
 
 # Build for linux/amd64 for GCP deployment
 build-docker-dev:
-	docker buildx build --platform linux/amd64 -t tuanqpham0921/semantic-book-recommender-dev:rag_dev --push .
+	docker buildx build --platform linux/amd64 -t us-central1-docker.pkg.dev/[YOUR-PROJECT-ID]/[YOUR-REPO-NAME]/semantic-book-recommender-dev:rag_dev --push .
+
+# Alternative: Build and tag for both Docker Hub and Artifact Registry
+build-docker-push-gcp-dev:
+	docker buildx build --platform linux/amd64 \
+		-t tuanqpham0921/semantic-book-recommender-dev:rag_dev \
+		-t us-central1-docker.pkg.dev/semantic-book-recommender/bookrec-dev/semantic-book-recommender-dev:rag_dev \
+		--push .
