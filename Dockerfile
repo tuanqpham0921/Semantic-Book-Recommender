@@ -1,6 +1,6 @@
 # Use an official Python base image
-# use Linux/AMD64 for GCP
-FROM --platform=linux/amd64 python:3.11-slim
+# Platform will be specified by buildx --platform flag
+FROM python:3.11-slim
 
 # Set the working directory
 WORKDIR /app
