@@ -5,10 +5,10 @@ FROM --platform=linux/amd64 python:3.11-slim
 # Set the working directory
 WORKDIR /app
 
-# Copy app code and requirements
+# Upgrade pip and install dependencies
 COPY requirements.txt ./
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Only Copy what's needed for the app to run
 COPY main.py ./

@@ -159,7 +159,7 @@ def recommend_books(request: RecommendBooksRequest):
 
     # Perform semantic search on the filtered books
     books = similarity_search_filtered(content, books, db_books, SIMILAR_K)
-    logger.info(f"\nPOST-SEARCH BOOK LEN: {len(books)}")
+    logger.info(f"\nPOST SIMILARITY SEARCH BOOK LEN: {len(books)}")
     logger_separator()
 
     # apply the post-filters

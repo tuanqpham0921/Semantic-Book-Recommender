@@ -1,5 +1,5 @@
 # Makefile for Book Recommender API
-.PHONY: help install test test-unit test-integration run dev clean test-api test-api-batch
+.PHONY: help install test test-unit test-integration run dev clean test-api test-api-batch build-docker-dev
 
 # Default target
 help:
@@ -52,6 +52,6 @@ clean:
 	find . -type d -name "__pycache__" -delete
 	find . -type d -name ".pytest_cache" -exec rm -rf {} +
 
-# tuanqpham0921/semantic-book-recommender-dev@sha256:...
-GCP-dev:
-	docker buildx build --platform linux/amd64 -t tuanqpham0921/semantic-book-recommender-dev:latest --push .
+# Build for linux/amd64 for GCP deployment
+build-docker-dev:
+	docker buildx build --platform linux/amd64 -t tuanqpham0921/semantic-book-recommender-dev:rag_dev --push .
