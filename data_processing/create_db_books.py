@@ -5,8 +5,11 @@ import re
 import os
 
 # Load the CSV file into a pandas DataFrame
-books = pd.read_csv('data/books_with_emotion.csv')
-print(books.head())
+books = pd.read_parquet('data/books.parquet')
+print("Column names:")
+print(books.columns.tolist())
+print("=" * 100)
+
 
 # stuff with the thumbnail and picture sizes
 
@@ -65,6 +68,6 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 db_books = Chroma.from_documents(
     documents,
     embedding=OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY),
-    persist_directory="./chroma_db"  # Choose a folder name
+    persist_directory="data/chroma_db"  # Choose a folder name
 )
 print("Database created with Chroma.")
