@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Only Copy what's needed for the app to run
 COPY main.py ./
 COPY app/ ./app/
-COPY data/books.parquet ./data/
+COPY data/books.csv ./data/
 
 # Expose Cloud Run port
 EXPOSE 8080
