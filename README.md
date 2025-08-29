@@ -17,7 +17,7 @@ This project uses **Semantic Search** to recommend books based on user descripti
 
 ## 🛠 Tech Stack
 - **Frontend**: Vite + React (deployed on Firebase Hosting)
-- **Backend API**: FastAPI + ChromaDB (Vector Search)
+- **Backend API**: FastAPI + PostgreSQL with pgvector (Vector Search)
 - **LLM Integration**:
   - LangChain for chaining LLM workflows
   - OpenAI API for embeddings and language understanding
@@ -37,7 +37,7 @@ This project uses **Semantic Search** to recommend books based on user descripti
   - Text cleaning
   - Emotion tagging
   - Formatting into Parquet files.
-- **Embeddings**: Vector representations stored in **ChromaDB** for fast similarity search.
+- **Embeddings**: Vector representations stored in **PostgreSQL with pgvector** for fast similarity search.
 
 ---
 

@@ -17,7 +17,7 @@ def client():
 
 @pytest.mark.integration
 class TestMainIntegration:
-    """Integration tests with real dependencies (ChromaDB, OpenAI API, real data)"""
+    """Integration tests with real dependencies (PostgreSQL, OpenAI API, real data)"""
     
     def test_recommend_books_end_to_end_simple_query(self, client):
         """Test end-to-end recommendation with simple query"""
@@ -188,7 +188,7 @@ INTEGRATION TEST STRATEGY FOR MAIN.PY:
 
 ✅ **What We're Testing:**
 1. **End-to-end API functionality** - Real requests through FastAPI
-2. **Real ChromaDB integration** - Actual vector search
+2. **Real PostgreSQL integration** - Actual vector search with pgvector
 3. **Real OpenAI API calls** - Actual filter extraction 
 4. **Real data processing** - Using actual parquet files
 5. **Response schemas** - Ensuring API returns correct JSON structure

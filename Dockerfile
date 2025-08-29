@@ -14,7 +14,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY main.py ./
 COPY app/ ./app/
 COPY data/books.parquet ./data/
-COPY data/chroma_db/ ./data/chroma_db/
 
 # Expose Cloud Run port
 EXPOSE 8080

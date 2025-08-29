@@ -1,5 +1,4 @@
 langchain-openai
-langchain-chroma
 fastapi
 uvicorn
 pydantic
