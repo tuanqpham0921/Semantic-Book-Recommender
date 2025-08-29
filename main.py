@@ -63,33 +63,23 @@ def recommend_books(request: RecommendBooksRequest, db: Session = Depends(get_db
     # logger.info(f"CONTENT:\n {content}")
     # logger_separator()
 
-    # Get all books from PostgreSQL for initial filtering
-    all_books = db.query(BookEmbedding).all()
-    books_df = pd.DataFrame([book.to_dict() for book in all_books])
-    # logger.info(f"BOOK LEN: {len(books_df)}")
-    # logger_separator()
-
     # make a filtervalidation
     filterValidation = {}
-    # apply pre-filters to the books
-    books_df = filter_df.apply_pre_filters(books_df, filters, filterValidation)
-    # logger.info(f"\nPRE-FILTER BOOK LEN: {len(books_df)}")
-    # logger_separator()
 
-    # Perform semantic search on the filtered books using PostgreSQL
-    books_df = similarity_search_postgres(content, books_df, db, SIMILAR_K)
+    # Perform semantic search with filters directly in PostgreSQL
+    books_df = similarity_search_postgres(content, filters, db, SIMILAR_K)
     # logger.info(f"\nPOST-SEARCH BOOK LEN: {len(books_df)}")
     # logger_separator()
 
-    # apply the post-filters
+    # apply the post-filters (if needed for any additional processing)
     books_df = filter_df.apply_post_filters(books_df, filters, filterValidation, FINAL_K)
     # logger.info(f"\nPOST-FILTER BOOK LEN: {len(books_df)}")
     # logger_separator()
 
-    # # Log the number of recommendations and their details
-    # logger.info(f"Returning {len(books_df)} recommendations:\n")
-    # for _, row in books_df.head(DEBUG_K).iterrows():
-    #     logger.info(f"ISBN: {row['isbn13']}, Title: {row['title']}, Authors: {row['authors']}")
+    # Log the number of recommendations and their details
+    logger.info(f"Returning {len(books_df)} recommendations:\n")
+    for _, row in books_df.head(DEBUG_K).iterrows():
+        logger.info(f"ISBN: {row['isbn13']}, Title: {row['title']}, Authors: {row['authors']}")
     
     # logger_separator()
 
