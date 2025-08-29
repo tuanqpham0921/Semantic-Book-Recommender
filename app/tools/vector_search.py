@@ -1,11 +1,10 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from typing import List, Optional, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple
 import pandas as pd
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
-from ..database import BookEmbedding
 
 # Load environment variables
 load_dotenv()

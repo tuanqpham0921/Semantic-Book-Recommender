@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Float, Text
+from sqlalchemy import Column, String, Float, Text
 from sqlalchemy.ext.declarative import declarative_base
 from pgvector.sqlalchemy import Vector
 
