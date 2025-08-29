@@ -1,13 +1,11 @@
 import logging
 from fastapi import FastAPI, Depends
-from typing import List
 import pandas as pd
 from sqlalchemy.orm import Session
 
 # Import models and configuration
 from .models import QueryRequest, BookRecommendation, ReasoningResponse, RecommendBooksRequest, BookRecommendationResponse
 from .config import add_cors_middleware, get_db
-from .database import BookEmbedding
 
 # Import filter_query module from tools folder
 from .tools import filter_query

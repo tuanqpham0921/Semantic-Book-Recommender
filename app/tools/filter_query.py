@@ -1,6 +1,5 @@
 import json
 import os
-import pandas as pd
 import re
 from typing import Optional, Dict, Any, List
 from openai import OpenAI

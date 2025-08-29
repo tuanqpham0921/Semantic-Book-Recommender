@@ -1,5 +1,4 @@
 import pandas as pd
-import logging
 
 # make sure that all authors are the requested author
 def validate_author_filter(books: pd.DataFrame, authors: list, filterValidation: dict):
