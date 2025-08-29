@@ -9,10 +9,10 @@ from .models import QueryRequest, BookRecommendation, ReasoningResponse, Recomme
 from .config import add_cors_middleware, get_db
 from .database import BookEmbedding
 
-# Import filter_query module from app folder
-from . import filter_query
-from . import filter_df
-from .vector_search import similarity_search_postgres
+# Import filter_query module from tools folder
+from .tools import filter_query
+from .tools import filter_df
+from .tools.vector_search import similarity_search_postgres
 
 # Configure middleware
 app = FastAPI()

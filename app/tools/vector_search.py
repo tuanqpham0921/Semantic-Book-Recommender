@@ -6,7 +6,7 @@ import pandas as pd
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
-from app.database import BookEmbedding
+from ..database import BookEmbedding
 
 # Load environment variables
 load_dotenv()

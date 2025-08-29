@@ -1,7 +1,7 @@
 import pandas as pd
 import logging
 
-from app.filter_validation import (
+from .filter_validation import (
     validate_author_filter, validate_genre_filter,
     validate_min_pages_filter, validate_max_pages_filter,
     validate_keywords_filter, validate_tone_filter,
@@ -41,7 +41,7 @@ def apply_post_filters(books: pd.DataFrame, filters: dict, filterValidation: dic
 
 if __name__ == "__main__":
     # quick smoke tests
-    from config import BOOKS_PATH
+    from ..config import BOOKS_PATH
     books = pd.read_parquet(BOOKS_PATH)
 
     filters = {
