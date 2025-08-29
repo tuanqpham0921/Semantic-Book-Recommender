@@ -1,16 +1,18 @@
 import logging
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from typing import List
 import pandas as pd
+from sqlalchemy.orm import Session
 
 # Import models and configuration
 from app.models import QueryRequest, BookRecommendation, ReasoningResponse, RecommendBooksRequest, BookRecommendationResponse
-from app.config import add_cors_middleware, db_books, BOOKS_PATH
+from app.config import add_cors_middleware, get_db
+from app.database import BookEmbedding
 
 # Import filter_query module from app folder
 import app.filter_query as filter_query
 import app.filter_df as filter_df
-from app.search import similarity_search_filtered
+from app.vector_search import similarity_search_postgres
 
 # Configure middleware
 app = FastAPI()
@@ -48,7 +50,7 @@ def reason_query_endpoint(request: QueryRequest):
 
 # Endpoint to recommend books based on user query
 @app.post("/recommend_books", response_model=BookRecommendationResponse)
-def recommend_books(request: RecommendBooksRequest):
+def recommend_books(request: RecommendBooksRequest, db: Session = Depends(get_db)):
     # logger_separator()
     # logger.info(f"\nREQUEST: {request}")
     # logger_separator()
@@ -61,31 +63,32 @@ def recommend_books(request: RecommendBooksRequest):
     # logger.info(f"CONTENT:\n {content}")
     # logger_separator()
 
-    # load in a fresh patch of books
-    books = pd.read_parquet(BOOKS_PATH)
-    # logger.info(f"BOOK LEN: {len(books)}")
+    # Get all books from PostgreSQL for initial filtering
+    all_books = db.query(BookEmbedding).all()
+    books_df = pd.DataFrame([book.to_dict() for book in all_books])
+    # logger.info(f"BOOK LEN: {len(books_df)}")
     # logger_separator()
 
     # make a filtervalidation
     filterValidation = {}
     # apply pre-filters to the books
-    books = filter_df.apply_pre_filters(books, filters, filterValidation)
-    # logger.info(f"\nPRE-FILTER BOOK LEN: {len(books)}")
+    books_df = filter_df.apply_pre_filters(books_df, filters, filterValidation)
+    # logger.info(f"\nPRE-FILTER BOOK LEN: {len(books_df)}")
     # logger_separator()
 
-    # Perform semantic search on the filtered books
-    books = similarity_search_filtered(content, books, db_books, SIMILAR_K)
-    # logger.info(f"\nPOST-SEARCH BOOK LEN: {len(books)}")
+    # Perform semantic search on the filtered books using PostgreSQL
+    books_df = similarity_search_postgres(content, books_df, db, SIMILAR_K)
+    # logger.info(f"\nPOST-SEARCH BOOK LEN: {len(books_df)}")
     # logger_separator()
 
     # apply the post-filters
-    books = filter_df.apply_post_filters(books, filters, filterValidation, FINAL_K)
-    # logger.info(f"\nPOST-FILTER BOOK LEN: {len(books)}")
+    books_df = filter_df.apply_post_filters(books_df, filters, filterValidation, FINAL_K)
+    # logger.info(f"\nPOST-FILTER BOOK LEN: {len(books_df)}")
     # logger_separator()
 
     # # Log the number of recommendations and their details
-    # logger.info(f"Returning {len(books)} recommendations:\n")
-    # for _, row in books.head(DEBUG_K).iterrows():
+    # logger.info(f"Returning {len(books_df)} recommendations:\n")
+    # for _, row in books_df.head(DEBUG_K).iterrows():
     #     logger.info(f"ISBN: {row['isbn13']}, Title: {row['title']}, Authors: {row['authors']}")
     
     # logger_separator()
@@ -94,7 +97,7 @@ def recommend_books(request: RecommendBooksRequest):
     return BookRecommendationResponse(
         recommendations = [
             BookRecommendation(**row.to_dict())
-            for _, row in books.iterrows()
+            for _, row in books_df.iterrows()
         ],
         validation = filterValidation,
         filters = filters,

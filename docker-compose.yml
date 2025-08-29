@@ -1,6 +1,20 @@
-version: '3.9'
-
 services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: book_recommender
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1234"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   book-app:
     build:
       context: .
@@ -9,5 +23,12 @@ services:
       - "8080:8080"  # Map local port 8080 to container's 8080
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}  # Loads from shell or env_file
+      - DATABASE_URL=postgresql://postgres:1234@postgres:5432/book_recommender
     env_file:
       - .env  # Loads variables from .env file (Optional but recommended)
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
