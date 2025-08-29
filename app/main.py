@@ -96,6 +96,7 @@ def recommend_books(request: RecommendBooksRequest, db: Session = Depends(get_db
 
 
 # place holder for API root endpoint
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the Book Recommendation API!"}
+@app.head('/health')
+@app.get('/health')
+def health_check():
+    return 'ok'
