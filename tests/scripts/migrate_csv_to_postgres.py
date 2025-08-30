@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from app.database import Base, BookEmbedding
-from app.vector_search import get_embedding
+from app.tools.vector_search import get_embedding
 from app.config import DATABASE_URL
 
 load_dotenv()
