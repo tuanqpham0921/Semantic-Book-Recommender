@@ -1,7 +1,7 @@
 import pandas as pd
 import logging
 
-from filter_validation import (
+from app.tools.filter_validation import (
     validate_keywords_filter, validate_tone_filter,
 )
 

@@ -4,13 +4,13 @@ import pandas as pd
 from sqlalchemy.orm import Session
 
 # Import models and configuration
-from .models import QueryRequest, BookRecommendation, ReasoningResponse, RecommendBooksRequest, BookRecommendationResponse
-from .config import add_cors_middleware, get_db
+from app.models import QueryRequest, BookRecommendation, ReasoningResponse, RecommendBooksRequest, BookRecommendationResponse
+from app.config import add_cors_middleware, get_db
 
 # Import filter_query module from tools folder
-from .tools import filter_query
-from .tools import filter_df
-from .tools.vector_search import similarity_search_postgres
+from app.tools import filter_query
+from app.tools import filter_df
+from app.tools.vector_search import similarity_search_postgres
 
 # Configure middleware
 app = FastAPI()
