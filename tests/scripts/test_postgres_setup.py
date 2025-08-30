@@ -10,7 +10,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from app.config import DATABASE_URL
 from app.database import Base, BookEmbedding
-from app.vector_search import get_embedding, similarity_search_postgres
+from app.tools.vector_search import get_embedding, similarity_search_postgres
 import pandas as pd
 
 def test_database_connection():

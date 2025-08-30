@@ -1,6 +1,7 @@
 services:
   postgres:
     image: pgvector/pgvector:pg16
+    restart: unless-stopped
     environment:
       POSTGRES_DB: book_recommender
       POSTGRES_USER: postgres
